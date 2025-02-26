@@ -1,0 +1,52 @@
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="breadcrumb_iner">
+                    <div class="breadcrumb_iner_item">
+                        <h2>Order Details - Order #{{ order.id }}</h2>
+                        <p>Home <span>-</span> Order Details</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Order Details Section -->
+<section class="order_details_area section_padding">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10 col-sm-12">
+                <div class="order_summary p-4 border rounded shadow-sm">
+                    <h3 class="mb-4">Order Details</h3>
+
+                    <p><strong>Status:</strong> {{ order.status }}</p>
+                    <p><strong>Placed on:</strong> {{ order.placed_at|date:"d M Y H:i" }}</p>
+                    <p><strong>Total Amount:</strong> ${{ order.total_amount }}</p>
+                    <p><strong>Payment Method:</strong> {{ order.payment_method }}</p>
+                    <p><strong>Delivery Address:</strong> {{ order.address.address_line1 }}, {{ order.address.city }}, {{ order.address.state }}</p>
+
+                    <h4 class="mt-4">Items in Your Order:</h4>
+                    <ul class="list-group">
+                        {% for item in order_items %}
+                            <li class="list-group-item">
+                                <strong>{{ item.product.title }}</strong> (x{{ item.quantity }}) - ${{ item.product.price }} each
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item">No items found in this order.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

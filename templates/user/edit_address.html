@@ -1,0 +1,89 @@
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="breadcrumb_iner">
+                    <div class="breadcrumb_iner_item">
+                        <h2>Edit Profile</h2>
+                        <p>Home <span>-</span> Edit Profile</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Form Section -->
+<section class="form_area section_padding">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10 col-sm-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h4>Edit Address</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST">
+                            {% csrf_token %}
+                            
+                            <!-- Address Line 1 -->
+                            <div class="form-group">
+                                <label for="id_address_line1">Address Line 1</label>
+                                {{ form.address_line1 }}
+                            </div>
+
+                            <!-- Address Line 2 -->
+                            <div class="form-group">
+                                <label for="id_address_line2">Address Line 2</label>
+                                {{ form.address_line2 }}
+                            </div>
+
+                            <!-- City -->
+                            <div class="form-group">
+                                <label for="id_city">City</label>
+                                {{ form.city }}
+                            </div>
+
+                            <!-- State -->
+                            <div class="form-group">
+                                <label for="id_state">State</label>
+                                {{ form.state }}
+                            </div>
+
+                            <!-- Postal Code -->
+                            <div class="form-group">
+                                <label for="id_postal_code">Postal Code</label>
+                                {{ form.postal_code }}
+                            </div>
+
+                            <!-- Country -->
+                            <div class="form-group">
+                                <label for="id_country">Country</label>
+                                {{ form.country }}
+                            </div>
+
+                            <!-- Default Address Checkbox -->
+                            <div class="form-check">
+                                <label for="id_is_default">
+                                    {{ form.is_default }} Is this your default address?
+                                </label>
+                            </div>
+
+                            <!-- Save Button -->
+                            <button type="submit" class="btn btn-primary btn-block mt-4">Save Address</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock content %}
+

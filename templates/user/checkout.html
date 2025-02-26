@@ -1,0 +1,274 @@
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="breadcrumb_iner">
+                    <div class="breadcrumb_iner_item">
+                        <h2>Checkout</h2>
+                        <p>Home <span>-</span> Checkout</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="checkout_area padding_top">
+    <div class="container">
+      
+       
+      <div class="billing_details">
+        <form method="POST" action="{% url 'core:checkout' %}" id="checkout-form">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-lg-7">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h3>Select Delivery Address</h3>
+                            <p><a href="{% url 'core:add_address' %}" class="btn_1">Add an address</a></p>
+                            <br>
+
+                            {% if addresses %}
+                                {% for address in addresses %}
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="address" id="address-{{ address.id }}" value="{{ address.id }}" {% if address.is_default %} checked {% endif %} required>
+                                        <label class="form-check-label" for="address-{{ address.id }}">
+                                            {{ address.address_line1 }},<br> {{ address.city }},<br> {{ address.state }},<br> {{ address.country }}
+                                        </label>
+                                        {% if address.is_default %}
+                                            <span class="badge badge-success ml-2">Default</span>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p>No addresses available. Please add an address.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="order_box">
+                        <h2>Your Order</h2>
+                        <ul class="list">
+                            <li>
+                                <a href="#">Product
+                                    <span>Total</span>
+                                </a>
+                            </li>
+                            {% for item in cart_items %}
+                                <li>
+                                    <a href="#">{{item.product.title}} 
+                                        <span class="middle">x {{ item.quantity }}</span>
+                                        <span class="last">${{ item.total_price }}</span>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <ul class="list list_2">
+                            <li>
+                                <a href="#">Subtotal
+                                    <span>${{ subtotal|floatformat:2 }}</span>
+                                </a>
+                            </li>
+                            
+                          <ul>
+    <li>
+        <a href="#">Coupon Discount
+            <span id="discount-display">
+                {% if discount > 0 %}
+                    - ${{ discount|floatformat:2 }}
+                {% else %}
+                    $00.00
+                {% endif %}
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="#">Total
+            <span id="total-display">${{ total_amount|floatformat:2 }}</span>
+        </a>
+    </li>
+</ul>
+
+                       <!-- Coupon Code Input -->
+<div class="coupon_section mb-4">
+    <form id="coupon_form" class="row g-3">
+        {% csrf_token %}
+        <div class="col-auto">
+            <label for="coupon_code" class="form-label">Have a Coupon?</label>
+            <input type="text" class="form-control" id="coupon_code" name="coupon_code" placeholder="Enter coupon code">
+        </div>
+        <div class="col-auto">
+            <button type="button" id="apply_coupon" class="btn btn-primary mt-4">Apply</button>
+            <a href="{% url 'core:list_coupons' %}" class="btn btn-primary mt-4">View Available Coupons</a>
+        </div>
+    </form>
+    <div id="coupon_message" class="mt-2"></div>
+</div>
+
+                    <!-- Payment Method Selection -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h3>Payment Method</h3>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" id="cod" value="COD" checked>
+                                <label class="form-check-label" for="cod">
+                                    Cash on Delivery (COD)
+                                </label>
+                            </div>
+                            
+                            {% if wallet_balance > 0 %}
+                                <div class="form-check" id="wallet-check">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="wallet" value="wallet">
+                                    <label class="form-check-label" for="wallet">
+                                        Wallet
+                                    </label>
+                                </div>
+                            {% else %}
+                                <div class="form-check" id="wallet-check" style="display:none;">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="wallet" value="wallet" disabled>
+                                    <label class="form-check-label" for="wallet">
+                                        Wallet (Insufficient balance)
+                                    </label>
+                                </div>
+                            {% endif %}
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" id="online" value="Online">
+                                <label class="form-check-label" for="online">
+                                    Online Payment
+                                </label>
+                            </div>
+                            <!-- PayPal Button (hidden initially) -->
+                            <div id="paypal-button-container" style="display:none;"></div>
+                        </div>
+                    </div>
+
+                  
+
+                    <button type="submit" class="btn_3">Proceed to Checkout</button>
+            </div>
+          </div>
+        </div>
+        </form>
+          <!-- PayPal SDK -->
+          <script src="https://www.paypal.com/sdk/js?client-id=AR4WixclI1mWnCVqCZteMxA2P3APjKpAz55gcloVAy94IpexJXo-otdQOWCDsbU_qzwhPdYenzkSU-Nw&components=buttons"></script>
+
+          <script>
+
+              document.addEventListener('DOMContentLoaded', function () {
+                  const onlineRadio = document.getElementById('online');
+                  const paypalButtonContainer = document.getElementById('paypal-button-container');
+
+                  // Show PayPal button when "Online Payment" is selected
+                  onlineRadio.addEventListener('change', function () {
+                      if (this.checked) {
+                          paypalButtonContainer.style.display = 'block';  // Show PayPal button
+                      } else {
+                          paypalButtonContainer.style.display = 'none'; // Hide PayPal button
+                      }
+                  });
+
+                  // PayPal Button Setup
+                  paypal.Buttons({
+                      createOrder: function(data, actions) {
+                          return actions.order.create({
+                              purchase_units: [{
+                                  amount: {
+                                      value: '{{ total_amount }}',
+                                  }
+                              }]
+                          });
+                      },
+                      onApprove: function(data, actions) {
+                          return actions.order.capture().then(function(details) {
+                                        // Get CSRF token from the HTML page (make sure it's available in your template)
+                              const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                              console.log("Payment Details: ", details);
+                              fetch("{% url 'core:execute_payment' %}", {
+                                  method: "POST",
+                                  headers: {
+                                      "Content-Type": "application/json",
+                                      "X-CSRFToken": csrfToken,  // Include CSRF token in headers
+                                  },
+                                  body: JSON.stringify({
+                                      orderID: data.orderID,
+                                      payerID: details.payer.payer_id,
+                                  }),
+                              })
+                              .then(response => response.json())
+                              .then(data => {
+                                  if (data.success) {
+                                      window.location.href = "{% url 'core:payment_success' %}";
+                                  } else {
+                                      window.location.href = "{% url 'core:payment_failure' %}";
+                                  }
+                              });
+                          });
+                      }
+                  }).render('#paypal-button-container');
+              });
+
+ // Handle coupon application
+ document.getElementById('apply_coupon').addEventListener('click', function() {
+        const couponCode = document.getElementById('coupon_code').value;
+
+        fetch("{% url 'core:apply_coupon_user' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie('csrftoken'),
+            },
+            body: JSON.stringify({ coupon_code: couponCode }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                document.getElementById('discount-display').innerText = `- $${data.discount}`;
+                document.getElementById('total-display').innerText = `$${data.new_total_price}`;
+                document.getElementById('coupon_message').innerText = data.message;
+            } else {
+                document.getElementById('coupon_message').innerText = data.message;
+            }
+        })
+        .catch(error => {
+            document.getElementById('coupon_message').innerText = 'An error occurred while applying the coupon.';
+        });
+    });
+
+    // Utility function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+
+
+
+          </script>
+          
+      </div>
+    </div>
+  </section>
+
+
+ 
+
+  {% endblock content %}
+ 

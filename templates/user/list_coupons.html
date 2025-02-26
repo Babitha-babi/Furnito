@@ -1,0 +1,119 @@
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="breadcrumb_iner">
+                    <div class="breadcrumb_iner_item">
+                        <h2>My Addresses</h2>
+                        <p>Home <span>-</span> Addresses</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Address View Section -->
+<section class="cat_product_area section_padding">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar with Profile Options -->
+            <div class="col-lg-3">
+                <div class="left_sidebar_area">
+                    <aside class="left_widgets p_filter_widgets">
+                        <div class="l_w_title">
+                            <h3>My Profile</h3>
+                        </div>
+                        <div class="widgets_inner">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <a href="{% url 'core:user_profile' %}" class="text-decoration-none">Account Details</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <a href="{% url 'core:order_history' %}" class="text-decoration-none">Order History</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <a href="{% url 'core:address_view' %}" class="text-decoration-none">Address</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <a href="{% url 'wishlist:wishlist' %}" class="text-decoration-none">Wishlist</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <a href="{% url 'walletapp:wallet' %}" class="text-decoration-none">Wallet</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+
+            <!-- Main Content: Address List -->
+            <div class="col-lg-9">
+                <div class="row">
+                    <div class="col-12">
+                        <h1>Available Coupons</h1>
+    
+                           
+                                {% if coupons %}
+                                <div class="coupon-grid">
+                                    {% for coupon in coupons %}
+                                        <div class="coupon-card">
+                                            <strong>{{ coupon.code }}</strong>
+                                            <p>{{ coupon.discount_percentage }}% off</p>
+                                            <p><small>Expires on: {{ coupon.valid_until|date:"F j, Y" }}</small></p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <p>No active coupons available at the moment.</p>
+                                {% endif %}
+
+                            <a href="{% url 'core:checkout' %}" class="btn btn-primary mt-4">Go to Checkout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .coupon-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .coupon-card {
+        border: 1px solid #ddd;
+        padding: 15px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .coupon-card strong {
+        font-size: 1.2em;
+        color: #333;
+    }
+
+    .coupon-card p {
+        font-size: 1em;
+        color: #666;
+    }
+
+    .coupon-card small {
+        font-size: 0.8em;
+        color: #999;
+    }
+</style>
+
+
+{% endblock content %}

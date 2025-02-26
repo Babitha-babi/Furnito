@@ -1,0 +1,96 @@
+<!--
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block content %}
+<section class="cart_area padding_top">
+  <div class="container">
+    <div class="cart_inner">
+      <h1>Your Shopping Cart</h1>
+
+      {% if cart_items %}
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Product</th>
+                <th scope="col">Price</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Total</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in cart_items %}
+                <tr>
+                  <td>
+                    <div class="media">
+                      <div class="d-flex">
+                        <img src="{{ item.image.url }}" alt="{{ item.item }}" width="50" height="50">
+                      </div>
+                      <div class="media-body">
+                        <p>{{ item.item }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <h5>${{ item.price }}</h5>
+                  </td>
+                  <td>
+                    <div class="product_count">
+                      <form method="POST" action="{% url 'core:update_cart' item.id item.qty %}">
+                        {% csrf_token %}
+                        <div class="input-group">
+                          <button type="submit" class="input-number-decrement"><i class="ti-angle-down"></i></button>
+                          <input class="input-number" type="number" name="quantity" value="{{ item.qty }}" min="1" max="10" required>
+                          <button type="submit" class="input-number-increment"><i class="ti-angle-up"></i></button>
+                        </div>
+                      </form>
+                    </div>
+                  </td>
+                  <td>
+                    <h5>${{ item.total }}</h5>
+                  </td>
+                  <td>
+                    <form method="POST" action="{% url 'core:remove_item_from_cart' item.id %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          -->
+
+          <!-- Cart Total -->
+           <!--
+          <tr>
+            <td colspan="3">
+              <h5>Subtotal</h5>
+            </td>
+            <td>
+              <h5>${{ total_price }}</h5>
+            </td>
+          </tr>
+        -->
+          <!-- Checkout & Continue Shopping Buttons -->
+           <!--
+          <div class="checkout_btn_inner float-right">
+            <a href="{% url 'core:product_list' %}" class="btn_1">Continue Shopping</a>
+            <form method="POST" action="{% url 'core:create_order' %}">
+              {% csrf_token %}
+              <button type="submit" class="btn_1 checkout_btn_1">Proceed to Checkout</button>
+            </form>
+          </div>
+
+        </div> --><!-- table-responsive -->
+      <!-- {% else %}
+        <p>Your cart is empty.</p>
+        <a href="{% url 'core:product_list' %}" class="btn_1">Continue Shopping</a>
+      {% endif %}
+    </div> --><!-- cart_inner -->
+  <!-- </div> container -->
+<!-- </section>
+{% endblock %}  -->
+

@@ -1,0 +1,37 @@
+{% extends 'adminapp/admin_blank.html' %}
+
+{% block content %}
+  <h2>Category Management</h2>
+  <a href="{% url 'adminapp:add_category' %}" class="btn btn-primary mb-3">Add Category</a>
+
+  <!-- Responsive Table -->
+  <div class="bg-light rounded h-100 p-4">
+    <h6 class="mb-4">Category List</h6>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Image</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for category in categories %}
+            <tr>
+              <td>{{ category.title }}</td>
+              <td>{{ category.description }}</td>
+              <td>{{ category.image }}</td>
+
+              <td>
+                <a href="{% url 'adminapp:edit_category' category.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <a href="{% url 'adminapp:soft_delete_category' category.id %}" class="btn btn-danger btn-sm">Delete</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

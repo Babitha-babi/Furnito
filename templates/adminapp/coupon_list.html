@@ -1,0 +1,35 @@
+{% extends 'adminapp/admin_blank.html' %}
+
+{% block content %}
+  <div class="rounded p-4">
+    <h2>Coupons List</h2>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Discount</th>
+          <th>Valid From</th>
+          <th>Valid Until</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for coupon in coupons %}
+          <tr>
+            <td>{{ coupon.code }}</td>
+            <td>{{ coupon.discount_percentage }}%</td>
+            <td>{{ coupon.valid_from }}</td>
+            <td>{{ coupon.valid_until }}</td>
+            <td>
+              <a href="{% url 'adminapp:edit_coupon' coupon.id %}" class="btn btn-warning btn-sm">Edit</a>
+              <a href="{% url 'adminapp:delete_coupon' coupon.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <a href="{% url 'adminapp:add_coupon' %}" class="btn btn-primary">Add Coupon</a>
+  </div>
+{% endblock %}

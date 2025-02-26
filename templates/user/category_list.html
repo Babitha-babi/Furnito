@@ -1,0 +1,121 @@
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block content %}
+
+<!--================Home Banner Area =================-->
+<section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="breadcrumb_iner">
+                    <div class="breadcrumb_iner_item">
+                        <h2>Category</h2>
+                        <p>Home <span>-</span> Category</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- breadcrumb start-->
+
+<!--================Blog Area =================-->
+<section class="blog_area padding_top">
+    <div class="container">
+        <div class="row">
+            <!-- Blog Categories Display -->
+            <div class="col-lg-8 mb-5 mb-lg-0">
+                <div class="blog_left_sidebar">
+                    <div class="row">
+                        {% for p in category %}
+                            <div class="col-lg-4 col-md-6 mb-4">  
+                                <div class="blog_item">
+                                    <div class="blog_item_img">
+                                        <a href="{% url 'core:category_product_list' p.cid %}">
+                                            <img class="card-img rounded-0" src="{{ p.image.url }}" alt="" style="width: 100%; height: auto;">
+                                        </a>
+                                    </div>
+
+                                    <div class="blog_details">
+                                        <a class="d-inline-block" href="{% url 'core:category_product_list' p.cid %}">
+                                            <h2>{{ p.title }}</h2>
+                                        </a>
+                                        <p>{{ p.description }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if forloop.counter|divisibleby:3 %}
+                                </div><div class="row">  <!-- Start a new row after every 3 categories -->
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Pagination -->
+                    <nav class="blog-pagination justify-content-center d-flex">
+                        <ul class="pagination">
+                            {% if category.has_previous %}
+                                <li class="page-item">
+                                    <a href="?page={{ category.previous_page_number }}" class="page-link" aria-label="Previous">
+                                        <i class="ti-angle-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% for i in category.paginator.page_range %}
+                                <li class="page-item {% if category.number == i %}active{% endif %}">
+                                    <a href="?page={{ i }}" class="page-link">{{ i }}</a>
+                                </li>
+                            {% endfor %}
+                            {% if category.has_next %}
+                                <li class="page-item">
+                                    <a href="?page={{ category.next_page_number }}" class="page-link" aria-label="Next">
+                                        <i class="ti-angle-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Sidebar: Search and Category List -->
+            <div class="col-lg-4">
+                <div class="blog_right_sidebar">
+                    <!-- Search Widget -->
+                    <aside class="single_sidebar_widget search_widget">
+                        <form action="#">
+                            <div class="form-group">
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" placeholder='Search Keyword'
+                                           onfocus="this.placeholder = ''"
+                                           onblur="this.placeholder = 'Search Keyword'">
+                                    <div class="input-group-append">
+                                        <button class="btn" type="button"><i class="ti-search"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="button rounded-0 primary-bg text-white w-100 btn_1" type="submit">Search</button>
+                        </form>
+                    </aside>
+
+                    <!-- Category List Widget -->
+                    <aside class="single_sidebar_widget post_category_widget">
+                        <h4 class="widget_title">Categories</h4>
+                        <ul class="list cat-list">
+                            {% for p in category %}
+                                <li>
+                                    <a href="{% url 'core:category_product_list' p.cid %}" class="d-flex">
+                                        <p>{{ p.title }}</p>
+                                        <p>({{ p.category.count }})</p>  
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </aside>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--================Blog Area =================-->
+{% endblock content %}

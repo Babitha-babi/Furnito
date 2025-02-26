@@ -1,0 +1,123 @@
+/* General styles */
+h2, h4 {
+    color: #333;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+  
+  /* Image Gallery Styles */
+  #existing_images_section {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));  /* Responsive grid */
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .image_display {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    position: relative;
+  }
+  
+  .product-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+  }
+  
+  .image_info {
+    font-size: 12px;
+    color: #555;
+    margin-top: 5px;
+  }
+  
+  .image_id {
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .remove_image_button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .remove_image_button:hover {
+    background-color: #d32f2f;
+  }
+  
+  /* Image Upload Section Styles */
+  #image_upload_section {
+    margin-top: 30px;
+  }
+  
+  .image_upload_field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .image_input {
+    width: 80%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  #add_image_button {
+    margin-top: 20px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  #add_image_button:hover {
+    background-color: #45a049;
+  }
+  
+  /* Submit Button */
+  button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Mobile Responsiveness */
+  @media (max-width: 768px) {
+    #existing_images_section {
+      grid-template-columns: 1fr;  /* Stack images vertically on small screens */
+    }
+  
+    .image_upload_field {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    #add_image_button {
+      width: 100%;
+      padding: 12px;
+    }
+  }
+  

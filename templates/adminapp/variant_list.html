@@ -1,0 +1,43 @@
+<!-- adminapp/templates/adminapp/variant_list.html -->
+{% extends 'adminapp/admin_blank.html' %}
+
+{% block content %}
+  <h2>Variants of {{ product.title }}</h2>
+  
+  <a href="{% url 'adminapp:add_variant' product.id %}" class="btn btn-primary mb-3">Add Variant</a>
+
+  <div class="bg-light rounded h-100 p-4">
+    <h6 class="mb-4">Variant List</h6>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Size</th>
+            <th>Color</th>
+            <th>Stock</th>
+            <th>Price</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for variant in variants %}
+            <tr>
+              <td>{{ variant.size }}</td>
+              <td>{{ variant.color }}</td>
+              <td>{{ variant.stock }}</td>
+              <td>${{ variant.price }}</td>
+              <td>
+                <a href="{% url 'adminapp:edit_variant' variant.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <a href="{% url 'adminapp:delete_variant' variant.id %}" class="btn btn-danger btn-sm">Delete</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5">No variants available for this product.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

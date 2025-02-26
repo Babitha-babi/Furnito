@@ -1,0 +1,42 @@
+{% extends 'adminapp/admin_blank.html' %}
+{% load static %}
+
+{% block content %}
+  <h1>Manage Images for {{ product.title }}</h1>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    {{ formset.management_form }}
+    <div class="image-upload-form">
+      {% for form in formset %}
+        <div class="form-row">
+          <div class="col">
+            {{ form.image }}
+            {% if form.instance.image %}
+              <img src="{{ form.instance.image.url }}" width="50" height="50" />
+            {% endif %}
+          </div>
+          <div class="col">
+            {{ form.alt_text }}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    
+    <button type="submit">Save Images</button>
+  </form>
+  
+  <h2>Existing Images</h2>
+  <ul>
+    {% for image in product.images.all %}
+      <li>
+        <img src="{{ image.image.url }}" width="100" height="100" />
+        <span>{{ image.alt_text }}</span>
+        <a href="{% url 'adminapp:delete_product_image' image.id %}" onclick="return confirm('Are you sure you want to delete this image?')">Delete</a>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <a href="{% url 'adminapp:product_list' %}">Back to Product List</a>
+{% endblock %}

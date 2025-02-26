@@ -1,0 +1,42 @@
+<!-- user_list.html -->
+{% extends 'adminapp/admin_blank.html' %}
+
+{% block content %}
+  <h2>User Management</h2>
+
+  <!-- List of all users -->
+  <div class="bg-light rounded h-100 p-4">
+    <h6 class="mb-4">Users List</h6>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Username</th>
+            <th>Blocked</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+            <tr>
+              <td>{{ user.email }}</td>
+              <td>{{ user.username }}</td>
+              <td>{% if user.is_blocked %}Blocked{% else %}Active{% endif %}</td>
+              <td>
+                {% if user.is_blocked %}
+                  <a href="{% url 'adminapp:unblock_user' user.id %}" class="btn btn-success btn-sm">Unblock</a>
+                {% else %}
+                  <a href="{% url 'adminapp:block_user' user.id %}" class="btn btn-danger btn-sm">Block</a>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
+
+
+

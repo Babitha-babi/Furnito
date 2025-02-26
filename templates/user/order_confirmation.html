@@ -1,0 +1,63 @@
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="breadcrumb_iner">
+                    <div class="breadcrumb_iner_item">
+                        <h2>Order Confirmation</h2>
+                        <p>Home <span>-</span> Order Confirmation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Order Confirmation Section -->
+<section class="order_confirmation_area section_padding">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10 col-sm-12">
+                <div class="order_summary p-4 border rounded shadow-sm">
+                    <h3 class="mb-4">Order Confirmation</h3>
+
+                    <p>Your order has been successfully placed!</p>
+
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <strong>Order ID:</strong> {{ order.id }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Total Amount:</strong> ${{ order.total_amount }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Payment Method:</strong> {{ order.payment_method }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Shipping Address:</strong> {{ order.address.address_line1 }},
+                            {{ order.address.city }}, {{ order.address.state }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Status:</strong> {{ order.status }}
+                        </li>
+                    </ul>
+
+                    <div class="text-center mt-4">
+                        <a href="{% url 'core:order_history' %}" class="btn btn-primary">View All Orders</a>
+                        <a href="{% url 'core:download_invoice' order.id %}" target="_blank">
+                            Download Invoice
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock content %}

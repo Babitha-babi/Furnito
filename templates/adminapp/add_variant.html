@@ -1,0 +1,14 @@
+<!-- adminapp/templates/adminapp/add_variant.html -->
+{% extends 'adminapp/admin_blank.html' %}
+
+{% block content %}
+  <h2>Add Variant to Product: {{ product.title }}</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}  <!-- Render the form fields -->
+    <button type="submit" class="btn btn-primary">Add Variant</button>
+  </form>
+
+  <a href="{% url 'adminapp:variant_list' product.id %}" class="btn btn-secondary mt-3">Back to Variant List</a>
+{% endblock %}

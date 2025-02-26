@@ -1,0 +1,159 @@
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block content %}
+
+<!--================Home Banner Area =================-->
+<section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="breadcrumb_iner">
+                    <div class="breadcrumb_iner_item">
+                        <h2>{{ category.title }}</h2>
+                        <p>Home <span>-</span> {{ category.title }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--================End Home Banner Area =================-->
+
+<!--================Category Product Area =================-->
+<section class="cat_product_area section_padding">
+    <div class="container">
+        <div class="row">
+            <!-- Left Sidebar (Filters) -->
+            <div class="col-lg-3">
+                <div class="left_sidebar_area">
+                    <!-- Category Filter -->
+                    <aside class="left_widgets p_filter_widgets">
+                        <div class="l_w_title">
+                            <h3>Browse Categories</h3>
+                        </div>
+                        <div class="widgets_inner">
+                            <ul class="list">
+                                {% for c in categories %}
+                                <li>
+                                    <a href="{% url 'core:category_product_list' c.cid %}">{{ c.title }}</a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </aside>
+
+                 <!-- Price Filter -->
+                 <aside class="left_widgets p_filter_widgets">
+                    <div class="l_w_title">
+                        <h3>Price Range</h3>
+                    </div>
+                    <div class="widgets_inner">
+                        <form method="GET">
+                            <div class="form-group">
+                                <input type="number" name="min_price" value="{{ min_price }}" class="form-control" placeholder="Min Price">
+                            </div>
+                            <div class="form-group">
+                                <input type="number" name="max_price" value="{{ max_price }}" class="form-control" placeholder="Max Price">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Apply Filter</button>
+                        </form>
+                    </div>
+                </aside>
+
+                <!-- Sorting Filter -->
+                <aside class="left_widgets p_filter_widgets">
+                    <div class="l_w_title">
+                        <h3>Sort By</h3>
+                    </div>
+                    <div class="widgets_inner">
+                        <form method="GET">
+                            <div class="form-group">
+                                <select name="sort_by" class="form-control" onchange="this.form.submit()">
+                                    <option value="new_arrivals" {% if sort_by == 'new_arrivals' %}selected{% endif %}>New Arrivals</option>
+                                    <option value="price_low_high" {% if sort_by == 'price_low_high' %}selected{% endif %}>Price: Low to High</option>
+                                    <option value="price_high_low" {% if sort_by == 'price_high_low' %}selected{% endif %}>Price: High to Low</option>
+                                    <option value="a_to_z" {% if sort_by == 'a_to_z' %}selected{% endif %}>A to Z</option>
+                                    <option value="z_to_a" {% if sort_by == 'z_to_a' %}selected{% endif %}>Z to A</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                </aside>
+            </div>
+        </div>
+
+            <!-- Product Listings -->
+            <div class="col-lg-9">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="product_top_bar d-flex justify-content-between align-items-center">
+                            <div class="single_product_menu">
+                                <p><span>{{ products.paginator.count }}</span> Products Found</p>
+                            </div>
+
+                            <!-- Search Box -->
+                            <div class="d-flex align-items-center">
+                                <form method="GET" class="d-flex align-items-center">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" placeholder="Search" aria-describedby="inputGroupPrepend" value="{{ search }}" name="search">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="inputGroupPrepend"><i class="ti-search"></i></span>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary ml-2">Search</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row align-items-center latest_product_inner">
+                    {% for p in products %}
+                    <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+                        <div class="single_product_item">
+                            <a href="{% url 'core:product_detail' p.pid %}">
+                                <img src="{{ p.image.url }}" alt="{{ p.title }}" class="img-fluid">
+                            </a>
+                            <div class="single_product_text text-center">
+                                <h4>{{ p.title }}</h4>
+                                <h3>${{ p.price }}</h3>
+                                <p><strong>Stock:</strong> 
+                                    {% if p.total_stock > 0 %}
+                                    {{ p.total_stock }}
+                                    {% else %}
+                                        <span class="text-danger">Sold Out</span>
+                                    {% endif %}
+                                </p>
+                                <a href="#" class="add_cart">+ Add to Cart<i class="ti-heart"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                <div class="col-lg-12">
+                    <div class="pageination text-center">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    {% if products.has_previous %}
+                                    <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+                                    <li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}">Previous</a></li>
+                                    {% endif %}
+                                    <li class="page-item active"><span class="page-link">{{ products.number }}</span></li>
+                                    {% if products.has_next %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}">Next</a></li>
+                                    <li class="page-item"><a class="page-link" href="?page={{ products.paginator.num_pages }}">Last</a></li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--================End Category Product Area =================-->
+
+{% endblock content %}

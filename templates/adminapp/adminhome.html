@@ -1,0 +1,68 @@
+{% extends 'adminapp/admin_blank.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<h1>Admin Dashboard</h1>
+
+<!-- Filter for Sales Data -->
+<form method="get">
+    <select name="filter">
+        <option value="monthly" {% if filter_type == 'monthly' %}selected{% endif %}>Monthly</option>
+        <option value="yearly" {% if filter_type == 'yearly' %}selected{% endif %}>Yearly</option>
+    </select>
+    <button type="submit">Filter</button>
+</form>
+
+<!-- Sales Chart (Monthly/Yearly) -->
+<div>
+    <h2>Total Sales</h2>
+    <canvas id="salesChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Parse the JSON data passed from Django
+var salesData = JSON.parse('{{ sales_data|escapejs }}');
+
+var labels = Object.keys(salesData);
+var data = Object.values(salesData);
+
+var ctx = document.getElementById('salesChart').getContext('2d');
+var chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Total Sales',
+            data: data,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+        }]
+    }
+});
+</script>
+
+<!-- Best Selling Products -->
+<h3>Top 10 Best Selling Products</h3>
+<ul>
+    {% for product in best_selling_products %}
+        <li>{{ product.product__title }} - {{ product.total_sales }} sold</li>
+    {% endfor %}
+</ul>
+
+<!-- Best Selling Categories -->
+<h3>Top 10 Best Selling Categories</h3>
+<ul>
+    {% for category in best_selling_categories %}
+        <li>{{ category.product__category__title }} - {{ category.total_sales }} sold</li>
+    {% endfor %}
+</ul>
+
+
+
+
+
+            {% endblock content %}

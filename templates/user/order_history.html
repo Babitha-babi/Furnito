@@ -1,0 +1,109 @@
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="breadcrumb_iner">
+                    <div class="breadcrumb_iner_item">
+                        <h2>Order history</h2>
+                        <p>Home <span>-</span> Order History</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Order History Section -->
+<section class="order_history_area section_padding">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-md-12">
+                <h2 class="text-center mb-4">Order History</h2>
+
+                <!-- Search Form -->
+                <form method="GET" action="" class="mb-4">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search" placeholder="Search by Order ID or Status" value="{{ search_query }}">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit">Search</button>
+                        </div>
+                    </div>
+                </form>
+
+                {% if page_obj %}
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Status</th>
+                                <th>Placed On</th>
+                                <th>Total Amount</th>
+                                <th>Payment Method</th>
+                                <th>Delivery Address</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in page_obj %}
+                                <tr>
+                                    <td>{{ order.id }}</td>
+                                    <td>{{ order.status }}</td>
+                                    <td>{{ order.placed_at|date:"d M Y H:i" }}</td>
+                                    <td>${{ order.total_amount }}</td>
+                                    <td>{{ order.payment_method }}</td>
+                                    <td>{{ order.address.address_line1 }}, {{ order.address.city }}, {{ order.address.state }}</td>
+                                    <td>
+                                        <div class="d-flex justify-content-start">
+                                            {% if order.status == 'Pending' %}
+                                                <form method="POST" action="{% url 'core:cancel_order' order.id %}" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger btn-sm mr-2">Cancel Order</button>
+                                                </form>
+                                            {% elif order.status == 'Delivered' %}
+                                                <form method="POST" action="{% url 'core:return_order' order.id %}" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-warning btn-sm mr-2">Return Order</button>
+                                                </form>
+                                            {% endif %}
+                                            <a href="{% url 'core:order_detail' order.id %}" class="btn btn-info btn-sm">View Details</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- Pagination -->
+                    <div class="pagination d-flex justify-content-center">
+                        <span class="mr-2">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                        <div>
+                            <span class="mr-2">
+                                {% if page_obj.has_previous %}
+                                    <a href="?page=1&search={{ search_query }}" class="btn btn-outline-secondary">First</a>
+                                    <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}" class="btn btn-outline-secondary">Previous</a>
+                                {% endif %}
+                            </span>
+                            <span class="mr-2">
+                                {% if page_obj.has_next %}
+                                    <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}" class="btn btn-outline-secondary">Next</a>
+                                    <a href="?page={{ page_obj.paginator.num_pages }}&search={{ search_query }}" class="btn btn-outline-secondary">Last</a>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                {% else %}
+                    <p class="text-center">No orders found. Start shopping now!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

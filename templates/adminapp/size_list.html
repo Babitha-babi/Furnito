@@ -1,0 +1,33 @@
+{% extends 'adminapp/admin_blank.html' %}
+
+{% block content %}
+  <h2>Size Management</h2>
+  <a href="{% url 'adminapp:add_size' %}" class="btn btn-primary mb-3">Add Size</a>
+
+  <!-- Responsive Table -->
+  <div class="bg-light rounded h-100 p-4">
+    <h6 class="mb-4">Size List</h6>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for size in sizes %}
+            <tr>
+              <td>{{ size.name }}</td>
+              
+              <td>
+                <a href="{% url 'adminapp:edit_size' size.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <a href="{% url 'adminapp:soft_delete_size' size.id %}" class="btn btn-danger btn-sm">Delete</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

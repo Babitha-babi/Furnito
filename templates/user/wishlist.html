@@ -1,0 +1,86 @@
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="breadcrumb_iner">
+                    <div class="breadcrumb_iner_item">
+                        <h2>My Wishlist</h2>
+                        <p>Home <span>-</span> My Wishlist</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Wishlist Section -->
+<section class="cat_product_area section_padding">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar with Profile Options -->
+            <div class="col-lg-3">
+                <div class="left_sidebar_area">
+                    <aside class="left_widgets p_filter_widgets">
+                        <div class="l_w_title">
+                            <h3>My Profile</h3>
+                        </div>
+                        <div class="widgets_inner">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <a href="{% url 'core:user_profile' %}" class="text-decoration-none">Account Details</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <a href="{% url 'core:order_history' %}" class="text-decoration-none">Order History</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <a href="{% url 'core:address_view' %}" class="text-decoration-none">Addresses</a>
+                                </li>
+                            <li class="list-group-item">
+                                <a href="{% url 'wishlist:wishlist' %}" class="text-decoration-none">Wishlist</a>
+                            </li>
+                            <li class="list-group-item">
+                                <a href="{% url 'walletapp:wallet' %}" class="text-decoration-none">Wallet</a>
+                            </li>
+                            </ul>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+
+            <!-- Main Content: Wishlist Items -->
+            <div class="col-lg-9">
+                <div class="row">
+                    
+                    <div class="col-12">
+                        <h2>Your Wishlist</h2>
+                        {% if wishlist_items %}
+                        <ul class="list-group">
+                            {% for item in wishlist_items %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <a href="{% url 'core:product_detail' item.product.pid %}">{{ item.product.title }}</a>
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'wishlist:remove_from_wishlist' item.product.id %}" class="btn btn-danger btn-sm">Remove</a>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                            <p>Your wishlist is empty.</p>
+                        {% endif %}
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block content %}
+
+<!--================Home Banner Area =================-->
+<section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="breadcrumb_iner">
+                    <div class="breadcrumb_iner_item">
+                        <h2>Cart</h2>
+                        <p>Home <span>-</span> Your Cart</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- breadcrumb start-->
+
+
+
+
+<section class="cart_area padding_top">
+    <div class="container">
+        <div class="cart_inner">
+            <div class="table-responsive">
+                {% if cart.items.count == 0 %}
+                    <p>Your cart is empty.</p>
+                {% else %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Product</th>
+                            <th scope="col">Price</th>
+                            <th scope="col">Quantity</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart.items.all %}
+                        <tr>
+                            <td>
+                                <div class="media">
+                                    <div class="d-flex">
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" width="50" height="50" class="img-fluid">
+                                    </div>
+                                    <div class="media-body">
+                                        <p>{{ item.product.title }} - {{ item.variant.size.name }} / {{ item.variant.color.name }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><h5>${{ item.variant.price }}</h5></td>
+                            <td>
+                                <div class="product_count">
+                                    <form action="{% url 'core:update_cart' item.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <span class="inumber-decrement"> <i class="ti-minus"></i></span>
+                                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.variant.stock }}" required>
+                                        <span class="number-increment"> <i class="ti-plus"></i></span>
+                                        <button class="btn_1" type="submit">Update</button>
+                                    </form>
+                                </div>
+                            </td>
+                            <td><h5>${{ item.total_price }}</h5></td>
+                            <td>
+                                <h5><a href="{% url 'core:remove_from_cart' item.id %}">Remove</a></h5>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td></td>
+                            <td></td><td></td>
+                            <td><h5>Subtotal</h5></td>
+                            <td><h5>${{ cart.total_price }}</h5></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="checkout_btn_inner float-right">
+                    <a class="btn_1" href="{% url 'core:category_list' %}">Continue Shopping</a>
+                    <a class="btn_1 checkout_btn_1" href="{% url 'core:checkout' %}">Proceed to checkout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+
+<!-- Add responsive styles for smaller screens using media queries -->
+<style>
+    /* Ensure images scale correctly on smaller screens */
+    .img-fluid {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* Mobile-specific adjustments */
+    @media (max-width: 768px) {
+        .table th, .table td {
+            font-size: 12px;
+        }
+
+        .cart_area {
+            padding-top: 30px;
+        }
+
+        .product_count input {
+            width: 50px;
+        }
+
+        .checkout_btn_inner {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .bottom_button, .shipping_area {
+            display: none;
+        }
+
+        .shipping_box {
+            margin-bottom: 15px;
+        }
+    }
+
+    /* For very small screens */
+    @media (max-width: 480px) {
+        .table {
+            font-size: 10px;
+        }
+
+        .cart_inner {
+            padding: 0;
+        }
+
+        .product_count input {
+            width: 40px;
+        }
+
+        .shipping_box ul {
+            padding-left: 15px;
+        }
+    }
+</style>
+
+<script>
+    // Increment and Decrement Quantity
+    document.querySelectorAll('.number-increment').forEach((button) => {
+        button.addEventListener('click', function () {
+            let quantityInput = this.previousElementSibling;
+            let currentQuantity = parseInt(quantityInput.value);
+            let maxQuantity = parseInt(quantityInput.getAttribute('max'));
+            if (currentQuantity < maxQuantity) {
+                quantityInput.value = currentQuantity + 1;
+            }
+        });
+    });
+
+    document.querySelectorAll('.inumber-decrement').forEach((button) => {
+        button.addEventListener('click', function () {
+            let quantityInput = this.nextElementSibling;
+            let currentQuantity = parseInt(quantityInput.value);
+            if (currentQuantity > 1) {
+                quantityInput.value = currentQuantity - 1;
+            }
+        });
+    });
+
+    // Update Cart Item
+    document.querySelectorAll('.update-btn').forEach((button) => {
+        button.addEventListener('click', function () {
+            let cartItemId = this.closest('tr').getAttribute('data-cart-item-id');
+            let newQuantity = this.closest('tr').querySelector('.input-number').value;
+
+            // Send AJAX request to update cart
+            fetch(`/update-cart/${cartItemId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ quantity: newQuantity })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    // Update the total price in the table
+                    this.closest('tr').querySelector('td:nth-child(4) h5').textContent = `$${data.updated_total_price}`;
+                    // Update the cart total
+                    document.querySelector('.cart_total').textContent = `$${data.cart_total}`;
+                }
+            });
+        });
+    });
+</script>
+
+
+{% endblock content %}

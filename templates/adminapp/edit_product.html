@@ -1,0 +1,86 @@
+{% extends 'adminapp/admin_blank.html' %}
+
+{% block content %}
+  <h2>Edit Product: {{ product.title }}</h2>
+
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <h4>Upload Product Images</h4>
+
+    <!-- Display existing product images -->
+    <div id="existing_images_section" class="image-gallery">
+      {% for image in product.p_images.all %}
+        <div class="image_display">
+          <img src="{{ image.images.url }}" alt="Product Image" class="product-image">
+          <div class="image_info">
+            <span class="image_id">ID: {{ image.id }}</span>
+          </div>
+          <button type="button" class="remove_image_button" data-image-id="{{ image.id }}">Remove</button>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Dynamically add new image input fields -->
+    <div id="image_upload_section">
+      <div class="image_upload_field">
+        <input type="file" name="product_images" class="image_input" multiple />
+        <button type="button" class="remove_image_button">Remove</button>
+      </div>
+    </div>
+
+    <button type="button" id="add_image_button" class="btn btn-primary">Add Another Product Image</button>
+
+    <button type="submit" class="btn btn-success">Save Product</button>
+  </form>
+
+  <script>
+    // JavaScript to handle dynamic addition of image input fields
+    document.getElementById('add_image_button').addEventListener('click', function() {
+      var newField = document.createElement('div');
+      newField.classList.add('image_upload_field');
+      
+      newField.innerHTML = `
+        <input type="file" name="product_images" class="image_input" multiple />
+        <button type="button" class="remove_image_button">Remove</button>
+      `;
+      
+      document.getElementById('image_upload_section').appendChild(newField);
+      
+      // Add event listener for remove button
+      newField.querySelector('.remove_image_button').addEventListener('click', function() {
+        newField.remove();
+      });
+    });
+
+    // Remove an image field when 'Remove' is clicked
+    document.querySelectorAll('.remove_image_button').forEach(function(button) {
+      button.addEventListener('click', function() {
+        button.parentElement.remove();
+      });
+    });
+
+    // Remove an existing image from the backend (AJAX or redirect to remove view)
+    document.querySelectorAll('.remove_image_button').forEach(function(button) {
+      button.addEventListener('click', function(event) {
+        var imageId = event.target.dataset.imageId;
+        if (imageId) {
+          fetch(`/remove-product-image/${imageId}/`, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+          }).then(response => {
+            if (response.ok) {
+              event.target.closest('.image_display').remove();  // Remove the image element from the DOM
+            }
+          });
+        } else {
+          event.target.parentElement.remove();
+        }
+      });
+    });
+  </script>
+
+{% endblock %}

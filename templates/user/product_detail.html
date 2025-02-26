@@ -1,0 +1,260 @@
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block content %}
+  <!-- breadcrumb start-->
+  <section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="breadcrumb_iner">
+            <div class="breadcrumb_iner_item">
+              <h2>Shop Product</h2>
+              <p>Home <span>-</span>{{ product.title }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- breadcrumb end-->
+
+  <div class="product_image_area section_padding">
+    <div class="container">
+      <div class="row s_product_inner" style="justify-content:space-evenly">
+        <!-- Product Images Section -->
+        <div class="col-lg-6 col-xl-6">
+          <div class="product_slider_img">
+            <div class="lSSlideOuter vertical">
+              <div class="lSSlideWrapper usingCss">
+                <div id="vertical" class="lightSlider lsGrab lSSlide">
+                  {% for image in p_images|slice:":4" %}
+                    <div data-thumb="{{ image.images.url }}" class="lslide" style="height: 450px; margin-bottom: 0px;">
+                      <img class="zoomImg" src="{{ image.images.url }}" alt="Product Image">
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+              <div class="lSAction">
+                <a class="lSPrev"><i class="fa fa-chevron-up"></i></a>
+                <a class="lSNext"><i class="fa fa-chevron-down"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product Details Section -->
+        <div class="col-lg-4 col-xl-4">
+          <div class="container-fluid">
+            <div class="s_product_text">
+              <h5>previous <span>|</span> next</h5>
+              <h3>{{ product.title }}</h3>
+              <h2><span id="variant-price">{{ product.price }}</span></h2>
+              <ul class="list">
+                <li><a class="active" href="#"><span>Category</span>: {{ product.category.title }}</a></li>
+                <li><a href="#"><span>Availability</span>: {% if product.in_stock > 0 %}In Stock{% else %}Out of Stock{% endif %}</a></li>
+              </ul>
+              <p>{{ product.description }}</p>
+              <form action="{% url 'core:add_to_cart' product.id %}" method="POST">
+                {% csrf_token %}
+              <table class="table table-bordered">
+                <tr>
+                    <th>Colors</th>
+                    <td>
+                        <div>
+                            {% for variant in variants %}
+                                {% if forloop.first or variant.color != prev_color %}
+                                    <label class="color-radio">
+                                        <input type="radio" name="color" value="{{ variant.color.id }}" data-price="{{ variant.price }}" data-stock="{{ variant.stock }}" data-color="{{ variant.color.name }}">
+                                        <!-- <span style="background-color: {{ variant.color.code }}; display: inline-block; width: 30px; height: 30px; border-radius: 50%;"></span>--> {{ variant.color.name }} 
+                                    </label><br>
+                                {% endif %}
+                                {% with prev_color=variant.color %}
+                                {% endwith %}
+                            {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Sizes</th>
+                    <td>
+                        <div>
+                            {% for variant in variants %}
+                                {% if forloop.first or variant.size != prev_size %}
+                                    <label class="size-radio">
+                                        <input type="radio" name="size" value="{{ variant.size.id }}" data-price="{{ variant.price }}" data-stock="{{ variant.stock }}" data-size="{{ variant.size.name }}">
+                                        {{ variant.size.name }}
+                                    </label><br>
+                                {% endif %}
+                                {% with prev_size=variant.size %}
+                                {% endwith %}
+                            {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+              <!-- Add to Cart Form -->
+                <p>Available stock: <span id="stock-info">{{ total_stock }}</span></p>
+                <div class="card_area d-flex justify-content-between align-items-center">
+                  <input type="hidden" name="selected_size" id="selected_size">
+                  <input type="hidden" name="selected_color" id="selected_color">
+                  <input type="hidden" name="variant_price" id="variant_price">
+                  <input type="hidden" name="variant_stock" id="variant_stock">
+                  <div class="product_count">
+                    <input class="input-number" id="product-quantity" type="number" name="quantity" value="1" min="1" max="10" required>
+                </div>
+                  <button type="submit" class="btn_3">Add to Cart</button>
+                   <!-- Display the heart icon with dynamic styling -->
+                   {% if product in user.wishlist.all %}
+                   <a href="{% url 'wishlist:remove_from_wishlist' product.id %}" class="like_us">
+                       <i class="ti-heart"></i> 
+                   </a>
+                   {% else %}
+                   <a href="{% url 'wishlist:add_to_wishlist' product.id %}" class="like_us">
+                       <i class="ti-heart"></i> 
+                   </a>
+                   {% endif %}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+<!-- Then include ElevateZoom -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.elevateZoom/3.0.8/jquery.elevateZoom.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Initially select the first color and size if none selected
+    let selectedColor = $("input[name='color']:checked").val();
+    let selectedSize = $("input[name='size']:checked").val();
+    const productId = "{{ product.id }}"; // Pass the product id dynamically
+
+    // Check if no color or size is selected, select the first one by default
+    if (!selectedColor) {
+        selectedColor = $("input[name='color']:first").val();
+        $("input[name='color'][value='" + selectedColor + "']").prop("checked", true);
+    }
+    if (!selectedSize) {
+        selectedSize = $("input[name='size']:first").val();
+        $("input[name='size'][value='" + selectedSize + "']").prop("checked", true);
+    }
+
+    // Update price and stock when size or color is changed
+    $("input[name='color'], input[name='size']").change(function() {
+        selectedColor = $("input[name='color']:checked").val();
+        selectedSize = $("input[name='size']:checked").val();
+
+
+         // Update hidden inputs with selected values
+        $("#selected_color").val(selectedColor);
+        $("#selected_size").val(selectedSize);
+
+
+        // Make an AJAX call to get the variant price and stock
+        $.ajax({
+            url: '{% url "core:get_variant_details" %}',  // URL for the backend view
+            method: 'GET',
+            data: {
+                'size_id': selectedSize,
+                'color_id': selectedColor,
+                'product_id': productId
+            },
+            success: function(response) {
+                if (response.price && response.stock !== undefined) {
+                    // Update price and stock in the form
+                    $("#variant-price").val(response.price);
+                    $("#variant-stock").val(response.stock);
+
+                    // Update the UI with the new price and stock
+                    $("#variant-price").text("$" + response.price);
+                    $("#stock-info").text(response.stock);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Something went wrong: ' + error);
+            }
+        });
+    });
+
+    // Trigger the change event on page load to set initial price and stock
+    $("input[name='color']:checked, input[name='size']:checked").trigger('change');
+});
+
+
+    // Elevate Zoom and LightSlider initializations
+    
+  $(document).ready(function() {
+  
+  $('.lslide img').each(function() {
+    $(this).elevateZoom({
+      zoomType: "inner",
+      cursor: "zoom-in",
+      zoomWindowFadeIn: 500,
+      zoomWindowFadeOut: 500,
+      zoomWindowWidth: 400,
+      zoomWindowHeight: 400
+    });
+  });
+
+  // Initialize lightSlider
+  $('#vertical').lightSlider({
+    item: 1,
+    vertical: true,
+    verticalHeight: 450,
+    thumbItem: 4,
+    slideMargin: 0,
+    speed: 600,
+    auto: true,
+    pause: 4000,
+    controls: false,
+    currentPagerPosition: 'middle',
+    prevHtml: '<i class="fa fa-chevron-up"></i>',
+    nextHtml: '<i class="fa fa-chevron-down"></i>',
+    onSliderLoad: function() {
+      $(".lSPager li").first().addClass('active');
+    }
+  });
+
+  // Thumbnail click event to change main image
+  $(".lSPager li").click(function() {
+    var index = $(this).index();
+    $('#vertical').goToSlide(index);
+    $(".lSPager li").removeClass('active');
+    $(this).addClass('active');
+  });
+
+    // Quantity increment and decrement
+    function incrementQuantity() {
+      var quantityInput = document.getElementById('product-quantity');
+      var currentValue = parseInt(quantityInput.value);
+      if (currentValue < 10) {
+        quantityInput.value = currentValue + 1;
+      }
+    }
+
+    function decrementQuantity() {
+      var quantityInput = document.getElementById('product-quantity');
+      var currentValue = parseInt(quantityInput.value);
+      if (currentValue > 1) {
+        quantityInput.value = currentValue - 1;
+      }
+    }
+
+    // Assign increment/decrement buttons
+    $('.inumber-decrement').click(decrementQuantity);
+    $('.number-increment').click(incrementQuantity);
+  });
+</script>
+
+{% endblock %}
+
+
+
+

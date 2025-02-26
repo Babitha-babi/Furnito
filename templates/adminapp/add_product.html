@@ -1,0 +1,52 @@
+{% extends 'adminapp/admin_blank.html' %}
+
+{% block content %}
+  <h2>Add New Product</h2>
+
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <h4>Upload Product Images</h4>
+    <div id="image_upload_section">
+      <div class="image_upload_field">
+        <input type="file" name="product_images" class="image_input" multiple />
+        <button type="button" class="remove_image_button">Remove</button>
+      </div>
+    </div>
+
+    <button type="button" id="add_image_button" class="btn btn-primary">Add Another Product Image</button>
+
+
+    
+
+    <button type="submit" class="btn btn-success">Save Product</button>
+  </form>
+
+  <script>
+    // JavaScript to handle dynamic addition of image input fields
+    document.getElementById('add_image_button').addEventListener('click', function() {
+      var newField = document.createElement('div');
+      newField.classList.add('image_upload_field');
+      
+      newField.innerHTML = `
+        <input type="file" name="product_images" class="image_input" multiple />
+        <button type="button" class="remove_image_button">Remove</button>
+      `;
+      
+      document.getElementById('image_upload_section').appendChild(newField);
+      
+      // Add event listener for remove button
+      newField.querySelector('.remove_image_button').addEventListener('click', function() {
+        newField.remove();
+      });
+    });
+    
+    // Remove an image field when 'Remove' is clicked
+    document.querySelectorAll('.remove_image_button').forEach(function(button) {
+      button.addEventListener('click', function() {
+        button.parentElement.remove();
+      });
+    });
+  </script>
+{% endblock %}

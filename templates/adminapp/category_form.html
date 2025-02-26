@@ -1,0 +1,24 @@
+{% extends 'adminapp/admin_blank.html' %}
+
+{% block content %}
+  <div class="bg-light rounded p-4">
+    <h2>{% if form.instance.id %} Edit {% else %} Add {% endif %} Category</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <!-- Form fields with Bootstrap classes -->
+      <div class="mb-3">
+        {{ form.as_p }}
+      </div>
+
+      <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+    <!-- If you are displaying an image preview -->
+{% if form.image.value %}
+<img src="{{ form.image.value.url }}" alt="Uploaded image" />
+{% endif %}
+  </div>
+{% endblock %}

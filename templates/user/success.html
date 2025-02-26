@@ -1,0 +1,12 @@
+<!-- success.html -->
+<h1>Payment Successful</h1>
+<p>Payment ID: {{ payment.id }}</p>
+<p>Amount Paid: {{ payment.transactions[0].amount.total }} {{ payment.transactions[0].amount.currency }}</p>
+<!-- success.html -->
+<script>
+    setTimeout(function() {
+        window.location.href = "{% url 'core:order_confirmation' %}";  // Redirect to order history after 3 seconds
+    }, 3000);  // 3 seconds delay
+</script>
+
+<p>Payment successful! Redirecting...</p>

@@ -1,0 +1,45 @@
+{% extends 'adminapp/admin_blank.html' %}
+{% load static %}
+
+{% block content %}
+  <h2>Order List</h2>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>User</th>
+        <th>Total Amount</th>
+        <th>Status</th>
+        <th>Payment Method</th>
+        <th>Placed At</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in orders %}
+        <tr>
+          <td>{{ order.id }}</td>
+          <td>{{ order.user.username }}</td>
+          <td>${{ order.total_amount }}</td>
+          <td>{{ order.get_status_display }}</td>
+          <td>{{ order.get_payment_method_display }}</td>
+          <td>{{ order.placed_at }}</td>
+          <td>
+            <form method="POST" action="{% url 'adminapp:change_order_status' order.id %}">
+              {% csrf_token %}
+              <select name="status">
+                <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
+                <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+              </select>
+              <button type="submit" class="btn btn-primary">Change Status</button>
+            </form>
+            {% if order.can_be_cancelled %}
+                <a href="{% url 'adminapp:cancel_order' order.id %}" class="btn btn-danger">Cancel</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

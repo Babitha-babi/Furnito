@@ -33,11 +33,49 @@
 
 <!-- Sales Report Summary -->
 {% if sales_count %}
-    <div class="report-summary">
-        <p><strong>Total Sales Count:</strong> {{ sales_count }}</p>
-        <p><strong>Total Sales Amount:</strong> ${{ total_sales }}</p>
-        <p><strong>Total Discount Applied:</strong> {{ total_discount }}%</p>
-    </div>
+    
+  <div class="my-4">
+    <h5>Sales Summary</h5>
+    <p><strong>Total Sales Count:</strong> {{ sales_count }}</p>
+    <p><strong>Total Sales Amount:</strong> {{ total_sales }}</p>
+    <p><strong>Total Discount Applied:</strong> {{ total_discount }}%</p>
+  </div>
+
+  <div class="table-responsive">
+    <h5>Sales Orders</h5>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>User</th>
+          <th>Total Amount</th>
+          <th>Discount Applied</th>
+          <th>Status</th>
+          <th>Payment Method</th>
+          <th>Placed At</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+          <tr>
+            <td>{{ order.id }}</td>
+            <td>{{ order.user.username }}</td>
+            <td>{{ order.total_amount }}</td>
+            <td>
+              {% if order.coupon %}
+                {{ order.coupon.discount_percentage }}%
+              {% else %}
+                No Discount
+              {% endif %}
+            </td>
+            <td>{{ order.get_status_display }}</td>  <!-- Assuming status is a choice field in your model -->
+            <td>{{ order.payment_method }}</td>  <!-- Displaying the payment method -->
+            <td>{{ order.placed_at }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
     <!-- Download Buttons -->
     <div class="download-buttons">

@@ -66,13 +66,22 @@
                                                     <button type="submit" class="btn btn-danger btn-sm mr-2">Cancel Order</button>
                                                 </form>
                                             {% elif order.status == 'Delivered' %}
-                                                <form method="POST" action="{% url 'core:return_order' order.id %}" style="display:inline;">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn btn-warning btn-sm mr-2">Return Order</button>
-                                                </form>
+                                                {% for return_request in order.return_requests.all %}
+                                                    {% if return_request.status == 'Pending' %}
+                                                        <!-- If return request status is Pending, show "Return Pending" button -->
+                                                        <button class="btn btn-secondary btn-sm mr-2" disabled>Return Pending</button>
+                                                    {% else %}
+                                                        <!-- If no pending return request, show the "Return Order" button -->
+                                                        <form method="POST" action="{% url 'core:return_order' order.id %}" style="display:inline;">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-warning btn-sm mr-2">Return Order</button>
+                                                        </form>
+                                                    {% endif %}
+                                                {% endfor %}
                                             {% endif %}
                                             <a href="{% url 'core:order_detail' order.id %}" class="btn btn-info btn-sm">View Details</a>
                                         </div>
+                                        
                                     </td>
                                 </tr>
                             {% endfor %}

@@ -22,7 +22,11 @@
               
               <td>
                 <a href="{% url 'adminapp:edit_size' size.id %}" class="btn btn-warning btn-sm">Edit</a>
-                <a href="{% url 'adminapp:soft_delete_size' size.id %}" class="btn btn-danger btn-sm">Delete</a>
+                {% if size.is_blocked %}
+                  <a href="{% url 'adminapp:unblock_size' size.id %}" class="btn btn-success btn-sm">Unblock</a>
+                {% else %}
+                  <a href="{% url 'adminapp:block_size' size.id %}" class="btn btn-danger btn-sm">Block</a>
+                {% endif %}
               </td>
             </tr>
           {% endfor %}

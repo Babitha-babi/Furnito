@@ -33,6 +33,9 @@ class Category(models.Model):
     title = models.CharField(max_length=100,default="sofa")
     image = models.ImageField(upload_to="category",default="category.jpg")
     description = models.TextField(null = True, blank = True,default="this is a product")
+    
+    is_blocked = models.BooleanField(default=False)  
+
 
     class Meta:
         verbose_name_plural = 'Categories'
@@ -101,6 +104,7 @@ class ProductImages(models.Model):
 class Color(models.Model):
     name = models.CharField(max_length=20)
     code = models.CharField(max_length=20,null=True,blank=True)
+    is_blocked = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -114,6 +118,7 @@ class Color(models.Model):
 class Size(models.Model):
     name = models.CharField(max_length=20)
     code = models.CharField(max_length=20,null=True,blank=True)
+    is_blocked = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -129,6 +134,7 @@ class Variants(models.Model):
     stock = models.PositiveIntegerField(default=0)  # Stock available for the variant
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)  # Variant-specific price
     image_id = models.FloatField(default=0)
+    is_blocked = models.BooleanField(default=False)
     
 
     def __str__(self):
@@ -160,6 +166,8 @@ class Coupon(models.Model):
     valid_until = models.DateTimeField()
     is_active = models.BooleanField(default=True)
     used = models.BooleanField(default=False)  # To track if the coupon is used
+    is_blocked = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.code
@@ -274,7 +282,7 @@ class Order(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Shipped', 'Shipped'), ('Delivered', 'Delivered'),('Cancelled', 'Cancelled'),('Returned', 'Returned'),], default='Pending')
+    status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Shipped', 'Shipped'), ('Rejected', 'Rejected'), ('Delivered', 'Delivered'),('Cancelled', 'Cancelled'),('Returned', 'Returned'),], default='Pending')
     payment_method = models.CharField(max_length=20, choices=[('COD', 'Cash on Delivery'),('wallet', 'Wallet'), ('Online', 'Online Payment')], default='COD')
     coupon = models.ForeignKey(Coupon, null=True, blank=True, on_delete=models.SET_NULL)
     placed_at = models.DateTimeField(auto_now_add=True)
@@ -304,5 +312,20 @@ class OrderItem(models.Model):
         self.total_amount = self.quantity * self.product.price
         super().save(*args, **kwargs)
 
+
+
+class ReturnRequest(models.Model):
+    order = models.ForeignKey('Order', related_name='return_requests', on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    reason = models.TextField()
+    status = models.CharField(
+        max_length=20,
+        choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Rejected', 'Rejected')],
+        default='Pending'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Return Request for Order #{self.order.id} by {self.user.username} - {self.status}"
 
 

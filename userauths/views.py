@@ -117,7 +117,11 @@ def signin(request):
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
         
-        if user is not None:    
+        if user is not None:  
+            if user.is_blocked:
+                messages.error(request, "Your account has been blocked. Please contact support.")
+                return redirect("userauths:signin")  
+                
             login(request, user)
             messages.success(request, f"Hi {request.user.username}, you are now logged-in")
             return redirect('adminapp:adminhome' if user.is_superuser else 'core:index')

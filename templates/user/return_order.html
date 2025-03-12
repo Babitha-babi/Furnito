@@ -1,0 +1,40 @@
+{% extends 'user/blank_layout.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="breadcrumb_iner">
+                    <div class="breadcrumb_iner_item">
+                        <h2>Order Details - Order #{{ order.id }}</h2>
+                        <p>Home <span>-</span> Order Details</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container" style="max-width: 500px; margin-top: 50px;">
+    <h2 class="text-center">Return Order {{ order.id }}</h2>
+    <p class="text-center">Please provide a reason for returning the order:</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_reason" class="form-label">Reason for Return:</label>
+            {{ form.reason }}
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Submit Return Request</button>
+    </form>
+
+    <div class="text-center mt-3">
+        <a href="{% url 'core:order_history' %}" class="btn btn-secondary">Back to Order History</a>
+    </div>
+</div>
+{% endblock %}

@@ -18,7 +18,9 @@
     <tbody>
       {% for order in orders %}
         <tr>
-          <td>{{ order.id }}</td>
+          <td>
+            <a href="{% url 'adminapp:order_detail' order.id %}">
+            {{ order.id }}</a></td>
           <td>{{ order.user.username }}</td>
           <td>${{ order.total_amount }}</td>
           <td>{{ order.get_status_display }}</td>
@@ -34,9 +36,18 @@
               </select>
               <button type="submit" class="btn btn-primary">Change Status</button>
             </form>
+            {% if order.status == 'Delivered' %}
+              {% for return_request in order.return_requests.all %}
+              {% if return_request.status == 'Pending' %}
+                <a href="{% url 'adminapp:process_return_request' order.id %}" class="btn btn-warning">Process Return</a>
+              {% endif %}
+            {% endfor %}
+            {% endif %}
             {% if order.can_be_cancelled %}
                 <a href="{% url 'adminapp:cancel_order' order.id %}" class="btn btn-danger">Cancel</a>
             {% endif %}
+             <!-- Check if the order is delivered and has a pending return request -->
+            
           </td>
         </tr>
       {% endfor %}

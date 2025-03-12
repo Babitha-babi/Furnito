@@ -1,5 +1,5 @@
 from django.shortcuts import render,get_object_or_404,HttpResponse,redirect
-from core.models import Product,Category,ProductImages,Cart,CartItem,Address, Order,UserProfile,OrderItem,Coupon,Size,Color,Variants,Coupon
+from core.models import Product,Category,ProductImages,Cart,CartItem,Address, Order,UserProfile,OrderItem,Coupon,Size,Color,Variants,Coupon,ReturnRequest
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.contrib import messages
 from walletapp.models import Wallet, WalletTransaction
 from decimal import Decimal
-from .forms import AddressForm,EditProfileForm,EditAddressForm
+from .forms import AddressForm,EditProfileForm,EditAddressForm,ReturnRequestForm
 from django.db.models import Q
 from .paypal_utils import configure_paypal
 import paypalrestsdk
@@ -24,15 +24,11 @@ def index(request):
     return render(request,'user/index.html',context)
 
 
-
 def product_list_view(request):
     # Get all products and categories
     items = Product.objects.all()
-    for product in items:
-        # Sum up the stock of all variants of the product
-        total_stock = sum(variant.stock for variant in product.variants_set.all())
-        product.total_stock = total_stock  # Add the total stock attribute to product
-    categories = Category.objects.all()
+    categories = Category.objects.filter(is_blocked=False)
+
 
     # Get filter parameters from request
     search_query = request.GET.get('search', '')
@@ -65,6 +61,11 @@ def product_list_view(request):
     elif sort_by == 'z_to_a':
         items = items.order_by('-title')  # Sort Z to A by title
 
+    # Calculate total stock for each product
+    for product in items:
+        total_stock = sum(variant.stock for variant in product.variants_set.all())
+        product.total_stock = total_stock  # Add the total stock attribute to product
+
     # Pagination setup
     page_number = request.GET.get('page', 1)
     paginator = Paginator(items, 12)  # Show 12 products per page
@@ -83,8 +84,10 @@ def product_list_view(request):
 
     return render(request, 'user/product_list.html', context)
 
+
 def category_list_view(request):
-    category = Category.objects.all()
+    category =Category.objects.filter(is_blocked=False)
+
     context = {
         "category":category
     }
@@ -159,28 +162,35 @@ def product_detail_view(request, pid):
     # Fetch the product, handle the case if it does not exist
     product = get_object_or_404(Product, pid=pid)
 
-    
     # Fetch all the images related to the product
     p_images = product.p_images.all()
 
-    # Fetch all sizes and colors associated with the product
+    # Fetch all variants (sizes and colors) associated with the product
     variants = Variants.objects.filter(product=product).select_related('color', 'size').distinct()
-    default_variant = variants.first() if variants.exists() else None
- 
 
+    # Get unique colors and sizes
+    colors = set(variant.color for variant in variants)
+    sizes = set(variant.size for variant in variants)
+
+    # Get the default variant (first available variant if any)
+    default_variant = variants.first() if variants.exists() else None
+
+    # Calculate total stock
     total_stock = sum([variant.stock for variant in variants])
 
-   
-
+    # Context to pass to the template
     context = {
         "product": product,
         "p_images": p_images,
         "variants": variants,
-        "total_stock" : total_stock,
+        "total_stock": total_stock,
         "default_variant": default_variant,
+        "colors": colors,
+        "sizes": sizes,
     }
 
     return render(request, 'user/product_detail.html', context)
+
 
 
 
@@ -423,9 +433,6 @@ def checkout(request):
                 discount = round(discount, 2)
                 messages.success(request, f"Coupon {coupon.code} applied successfully! Discount: ${discount:.2f}")
                 
-                # Debugging: Check the applied coupon
-                print(f"Applied coupon: {coupon}")
-                
                 return discounted_total, discount, coupon  # Return coupon as well
             else:
                 messages.error(request, "This coupon is expired or invalid.")
@@ -474,7 +481,7 @@ def checkout(request):
         # Handle payment method
         if payment_method == 'COD' and discounted_total > 1000:
             messages.error(request, "Cash on Delivery is not available for orders above Rs 1000. Please select a different payment method.")
-            return render_checkout_page(request, cart_items, discounted_total, discount,subtotal)
+            return render_checkout_page(request, cart_items, discounted_total, discount,subtotal,wallet_balance)
 
         # Wallet Payment
         if payment_method == 'wallet':
@@ -533,8 +540,7 @@ def render_checkout_page(request, cart_items, total_amount, discount,subtotal,wa
 
 
 def create_order(user, selected_address, discounted_total, payment_method, coupon):
-    # Debugging: Check if coupon is being passed correctly
-    print(f"Coupon being passed to order: {coupon}")
+    
     
     return Order.objects.create(
         user=user,
@@ -557,8 +563,7 @@ def create_order_items(order, cart_items):
             messages.error(f"Sorry, not enough stock for {cart_item.product.title}. Only {variant.stock} left.")
             return
 
-        # Deduct stock for each variant
-        print(f"Reducing stock for {variant.product.title}. Current stock: {variant.stock}, Quantity: {quantity}")
+       
         variant.stock -= quantity
         variant.save()
 
@@ -583,6 +588,13 @@ def order_confirmation(request, order_id):
 @login_required
 def order_history(request):
     orders = Order.objects.filter(user=request.user).order_by('-placed_at')  # Filter by user
+    return_requests = ReturnRequest.objects.filter(user=request.user)
+
+    # Loop through return requests and check for their status
+    for return_request in return_requests:
+        # If the return request is pending, add a flag to indicate it
+        return_request.is_pending = return_request.status == 'Pending'
+
     
     # Handling search functionality
     search_query = request.GET.get('search', '')
@@ -594,7 +606,7 @@ def order_history(request):
     page_number = request.GET.get('page')  # Get the page number from the URL
     page_obj = paginator.get_page(page_number)
     
-    return render(request, 'user/order_history.html', {'page_obj': page_obj, 'search_query': search_query})
+    return render(request, 'user/order_history.html', {'page_obj': page_obj, 'search_query': search_query, 'return_requests': return_requests})
 
 
 
@@ -636,10 +648,10 @@ def cancel_order(request, order_id):
         # If it's not COD, refund to wallet (for paid orders)
         wallet, created = Wallet.objects.get_or_create(user=request.user)
 
-        print(f"Before Update: {wallet.balance}")
+       
         wallet.balance += Decimal(refund_amount)  # Add the refund amount to the wallet balance
         wallet.save()
-        print(f"After Update: {wallet.balance}")
+       
 
         # Record the transaction in WalletTransaction
         WalletTransaction.objects.create(
@@ -659,20 +671,37 @@ def cancel_order(request, order_id):
 
 
 
+
+
 @login_required
 def return_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
 
     if order.status == 'Delivered':
-        # Implement return logic (e.g., updating stock, issuing refunds)
-        order.status = 'Returned'
-        order.save()
-        messages.success(request, f"Order #{order.id} has been marked as returned.")
+        if request.method == 'POST':
+            # User submits a return request with a reason
+            form = ReturnRequestForm(request.POST)
+            if form.is_valid():
+                # Create the return request
+                return_request = form.save(commit=False)
+                return_request.order = order
+                return_request.user = request.user
+                return_request.save()
+
+                messages.success(request, "Your return request has been submitted and is pending admin approval.")
+                return redirect('core:order_history')
+
+        else:
+            # If not a POST request, show the return request form
+            form = ReturnRequestForm()
+
+        return render(request, 'user/return_order.html', {
+            'order': order,
+            'form': form
+        })
     else:
         messages.error(request, f"Order #{order.id} can only be returned if it is delivered.")
-
-    return redirect('core:order_history')
-
+        return redirect('core:order_history')
 
 def list_coupons(request):
     # Filter active and valid coupons
@@ -722,6 +751,7 @@ def edit_profile(request):
         form = EditProfileForm(instance=profile)
 
     return render(request, 'user/edit_profile.html', {'form': form})
+
 
 
 
@@ -1031,11 +1061,7 @@ def download_invoice(request, order_id):
     # Retrieve the coupon associated with the order
     coupon = order.coupon  # This assumes the Order model has a field `coupon` that stores the coupon
 
-    # Debug: Check if coupon exists and print its discount_percentage
-    if coupon:
-        print(f"Coupon: {coupon.code}, Discount Percentage: {coupon.discount_percentage}")
-    else:
-        print("No coupon associated with this order.")
+  
 
     # Create a response object to serve the PDF file
     response = HttpResponse(content_type='application/pdf')
@@ -1111,23 +1137,19 @@ def download_invoice(request, order_id):
     # Space before the footer
     elements.append(Spacer(1, 24))
 
-    # Debug: Check if subtotal is correctly calculated
-    print(f"Subtotal: {subtotal}")
-
     # Calculate the discount
     if coupon:
         # Check if coupon.discount_percentage is valid and greater than 0
         if coupon.discount_percentage > 0:
             discount = (coupon.discount_percentage / 100) * subtotal  # Calculate discount based on coupon percentage
         else:
-            print(f"Invalid coupon discount_percentage: {coupon.discount_percentage}")
+         
             discount = 0
     else:
-        print("No coupon found for this order.")
+      
         discount = 0
 
-    # Debug: Check if discount is being applied correctly
-    print(f"Discount: {discount}")
+ 
 
     # Update the order total after the discount
     final_total = subtotal - discount

@@ -89,6 +89,17 @@ class OrderAdmin(admin.ModelAdmin):
 # Register the Order model with the custom admin
 admin.site.register(Order, OrderAdmin)
 
+from django.contrib import admin
+from .models import ReturnRequest
+
+class ReturnRequestAdmin(admin.ModelAdmin):
+    list_display = ('order', 'user', 'status', 'created_at')  # Display these fields in the admin list
+    list_filter = ('status', 'created_at')  # Filter by status and creation date
+    search_fields = ('order__id', 'user__username')  # Allow searching by order ID and user username
+
+admin.site.register(ReturnRequest, ReturnRequestAdmin)
+
+
 
 
 admin.site.register(Category,CategoryAdmin)

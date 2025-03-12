@@ -23,7 +23,11 @@
             <td>{{ coupon.valid_until }}</td>
             <td>
               <a href="{% url 'adminapp:edit_coupon' coupon.id %}" class="btn btn-warning btn-sm">Edit</a>
-              <a href="{% url 'adminapp:delete_coupon' coupon.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
+              {% if coupon.is_blocked %}
+              <a href="{% url 'adminapp:unblock_coupon' coupon.id %}" class="btn btn-success btn-sm">Unblock</a>
+              {% else %}
+                <a href="{% url 'adminapp:block_coupon' coupon.id %}" class="btn btn-danger btn-sm">Block</a>
+              {% endif %}
             </td>
           </tr>
         {% endfor %}

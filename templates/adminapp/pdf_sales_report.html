@@ -45,7 +45,13 @@
                     <td>{{ order.id }}</td>
                     <td>{{ order.user.username }}</td>
                     <td>${{ order.total_amount }}</td>
-                    <td>${{ order.apply_discount|floatformat:2 }}</td>
+                    <td>
+                        {% if order.coupon %}
+                          {{ order.coupon.discount_percentage }}%
+                        {% else %}
+                          No Discount
+                        {% endif %}
+                      </td>
                     <td>{{ order.status }}</td>
                     <td>{{ order.payment_method }}</td>
                     <td>{{ order.placed_at }}</td>
@@ -57,7 +63,7 @@
 
     <h3>Summary</h3>
     <p><strong>Total Sales:</strong> ${{ total_sales }}</p>
-    <p><strong>Total Discount:</strong> ${{ total_discount }}</p>
+    <p><strong>Total Discount:</strong> {{ total_discount }}%</p>
     <p><strong>Sales Count:</strong> {{ sales_count }}</p>
 </body>
 </html>

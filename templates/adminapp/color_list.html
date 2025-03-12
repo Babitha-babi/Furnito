@@ -12,7 +12,7 @@
         <thead>
           <tr>
             <th>Name</th>
-            <th>Code</th>
+            <!-- <th>Code</th> -->
             <th>Actions</th>
           </tr>
         </thead>
@@ -20,17 +20,21 @@
           {% for color in colors %}
             <tr>
               <td>{{ color.name }}</td>
-              <td>
+              <!-- <td>
                 {% if color.code %}
                   <div class="mb-3">
                     
-                    <div style="width: 40px; height: 40px; background-color: '{{ color.code }}';"></div>
+                    <div style="width: 40px; height: 40px; background-color: {{ color.code }};"></div>
                   </div>
                 {% endif %}
-              </td>
+              </td> -->
               <td>
                 <a href="{% url 'adminapp:edit_color' color.id %}" class="btn btn-warning btn-sm">Edit</a>
-                <a href="{% url 'adminapp:soft_delete_color' color.id %}" class="btn btn-danger btn-sm">Delete</a>
+                {% if color.is_blocked %}
+                <a href="{% url 'adminapp:unblock_color' color.id %}" class="btn btn-success btn-sm">Unblock</a>
+                {% else %}
+                  <a href="{% url 'adminapp:block_color' color.id %}" class="btn btn-danger btn-sm">Block</a>
+                {% endif %}
               </td>
             </tr>
           {% endfor %}

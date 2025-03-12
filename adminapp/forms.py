@@ -10,7 +10,7 @@ class ProductForm(forms.ModelForm):
         model = Product
         fields = [
             'title', 'category', 'image', 'description', 'price', 'old_price',
-            'specifications', 'variant', 'product_status', 'in_stock', 'stock', 'max_quantity_per_user'
+            'specifications', 'variant', 'product_status', 'in_stock', 'max_quantity_per_user'
         ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
@@ -23,7 +23,7 @@ class ProductForm(forms.ModelForm):
             'variant': forms.Select(choices=Product.VARIANTS, attrs={'class': 'form-control'}),
             'product_status': forms.Select(choices=Product.STATUS_CHOICE, attrs={'class': 'form-control'}),
             'in_stock': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'stock': forms.NumberInput(attrs={'class': 'form-control'}),
+            
             'max_quantity_per_user': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 class ProductImageForm(forms.ModelForm):

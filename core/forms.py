@@ -1,6 +1,6 @@
 import re
 from django import forms
-from .models import Address,UserProfile
+from .models import Address,UserProfile,ReturnRequest
 
 class AddressForm(forms.ModelForm):
     class Meta:
@@ -59,3 +59,16 @@ class EditProfileForm(forms.ModelForm):
                 raise forms.ValidationError("Phone number must be a 10-digit number.")
         
         return phone_number
+
+
+class ReturnRequestForm(forms.ModelForm):
+    class Meta:
+        model = ReturnRequest
+        fields = ['reason']
+        widgets = {
+            'reason': forms.Textarea(attrs={
+                'placeholder': 'Enter the reason for the return...',
+                'rows': 4,
+                'class': 'form-control',
+            }),
+        }

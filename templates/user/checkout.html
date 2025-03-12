@@ -31,7 +31,8 @@
                     <div class="card mb-4">
                         <div class="card-body">
                             <h3>Select Delivery Address</h3>
-                            <p><a href="{% url 'core:add_address' %}" class="btn_1">Add an address</a></p>
+                            <p><button type="button" class="btn_1"><a href="{% url 'core:add_address' %}">Add an address</a></button>
+                            </p>
                             <br>
 
                             {% if addresses %}

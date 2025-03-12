@@ -18,6 +18,8 @@ from django.utils import timezone
 import json
 
 # Dashboard View
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def adminhome(request):
     # Sales data by month or year filter
     filter_type = request.GET.get('filter', 'monthly')  # Monthly by default
@@ -52,12 +54,14 @@ def adminhome(request):
     return render(request, 'adminapp/adminhome.html', context)
 
 
-
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def product_list(request):
-    products = Product.objects.all()
+    products = Product.objects.all().order_by('-date')
     return render(request, 'adminapp/product_list.html', {'products': products})
 
 @login_required
+@user_passes_test(lambda u: u.is_superuser)
 def add_product(request):
     # if not request.user.is_superuser:
     #     messages.error(request, "You are not authorized to view this page.")
@@ -88,6 +92,7 @@ def add_product(request):
     return render(request, 'adminapp/add_product.html', {'form': form})
 
 @login_required
+@user_passes_test(lambda u: u.is_superuser)
 def edit_product(request, product_id):
     if not request.user.is_superuser:
         messages.error(request, "You are not authorized to edit this product.")
@@ -114,6 +119,8 @@ def edit_product(request, product_id):
 
 
 # Image Deletion View (for removing an image)
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 @csrf_exempt
 def remove_product_image(request, image_id):
     if request.method == 'DELETE':
@@ -135,7 +142,9 @@ def delete_product(request, product_id):
 
 
 
+
 @login_required
+@user_passes_test(lambda u: u.is_superuser)
 def product_images(request, product_id):
     product = Product.objects.get(id=product_id)
     
@@ -164,11 +173,14 @@ def delete_product_image(request, image_id):
     messages.success(request, f"Image deleted successfully from {product.title}.")
     return redirect('adminapp:product_images', product_id=product.id)
 
-
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def category_list(request):
     categories = Category.objects.all()
     return render(request, 'adminapp/category_list.html', {'categories': categories})
 
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def add_category(request):
     if request.method == 'POST':
         form = CategoryForm(request.POST, request.FILES)
@@ -181,6 +193,8 @@ def add_category(request):
     return render(request, 'adminapp/category_form.html', {'form': form})
 
 # Edit category
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def edit_category(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     if request.method == 'POST':
@@ -194,18 +208,35 @@ def edit_category(request, category_id):
     return render(request, 'adminapp/category_form.html', {'form': form})
 
 # Soft delete category
-def soft_delete_category(request, category_id):
+# Block category view
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def block_category(request, category_id):
     category = get_object_or_404(Category, id=category_id)
-    category.delete() 
-    messages.success(request, f"Category '{category.title}' has been deleted!")
+    category.is_blocked = True
+    category.save()
+    messages.success(request, f"Category '{category.title}' has been blocked!")
+    return redirect('adminapp:category_list')
+
+# Unblock category view
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def unblock_category(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    category.is_blocked = False
+    category.save()
+    messages.success(request, f"Category '{category.title}' has been unblocked!")
     return redirect('adminapp:category_list')
 
 
-
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def color_list(request):
     colors = Color.objects.all()
     return render(request, 'adminapp/color_list.html', {'colors': colors})
 
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def add_color(request):
     if request.method == 'POST':
         form = ColorForm(request.POST, request.FILES)
@@ -218,6 +249,8 @@ def add_color(request):
     return render(request, 'adminapp/color_form.html', {'form': form})
 
 # Edit color
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def edit_color(request, color_id):
     color = get_object_or_404(Color, id=color_id)
     if request.method == 'POST':
@@ -231,18 +264,36 @@ def edit_color(request, color_id):
     return render(request, 'adminapp/color_form.html', {'form': form})
 
 # Soft delete color
-def soft_delete_color(request, color_id):
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def block_color(request, color_id):
     color = get_object_or_404(Color, id=color_id)
-    color.delete() 
-    messages.success(request, f"color '{color.name}' has been deleted!")
+    color.is_blocked = True  # Assuming there's an `is_blocked` field in the model
+    color.save()
+    messages.success(request, f"Color '{color.name}' has been blocked!")
+    return redirect('adminapp:color_list')
+
+# Unblock color view
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def unblock_color(request, color_id):
+    color = get_object_or_404(Color, id=color_id)
+    color.is_blocked = False  # Assuming there's an `is_blocked` field in the model
+    color.save()
+    messages.success(request, f"Color '{color.name}' has been unblocked!")
     return redirect('adminapp:color_list')
 
 
 # Size
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def size_list(request):
     sizes = Size.objects.all()
     return render(request, 'adminapp/size_list.html', {'sizes': sizes})
 
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def add_size(request):
     if request.method == 'POST':
         form = SizeForm(request.POST, request.FILES)
@@ -255,6 +306,8 @@ def add_size(request):
     return render(request, 'adminapp/size_form.html', {'form': form})
 
 # Edit color
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def edit_size(request, size_id):
     size = get_object_or_404(Size, id=size_id)
     if request.method == 'POST':
@@ -267,16 +320,30 @@ def edit_size(request, size_id):
         form = SizeForm(instance=size)
     return render(request, 'adminapp/size_form.html', {'form': form})
 
-# Soft delete color
-def soft_delete_size(request, size_id):
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def block_size(request, size_id):
     size = get_object_or_404(Size, id=size_id)
-    size.delete() 
-    messages.success(request, f"size '{size.name}' has been deleted!")
+    size.is_blocked = True  # Set the is_blocked field to True
+    size.save()
+    messages.success(request, f"Size '{size.name}' has been blocked!")
+    return redirect('adminapp:size_list')
+
+# Unblock size view
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def unblock_size(request, size_id):
+    size = get_object_or_404(Size, id=size_id)
+    size.is_blocked = False  # Set the is_blocked field to False
+    size.save()
+    messages.success(request, f"Size '{size.name}' has been unblocked!")
     return redirect('adminapp:size_list')
 
 
 # List users for admin
 @login_required
+@user_passes_test(lambda u: u.is_superuser)
 def user_list(request):
     if not request.user.is_superuser:
         return HttpResponseForbidden("You are not authorized to view this page.")
@@ -286,6 +353,7 @@ def user_list(request):
 
 # Block user
 @login_required
+@user_passes_test(lambda u: u.is_superuser)
 def block_user(request, user_id):
     if not request.user.is_superuser:
         return HttpResponseForbidden("You are not authorized to block users.")
@@ -302,6 +370,7 @@ def block_user(request, user_id):
 
 # Unblock user
 @login_required
+@user_passes_test(lambda u: u.is_superuser)
 def unblock_user(request, user_id):
     if not request.user.is_superuser:
         return HttpResponseForbidden("You are not authorized to unblock users.")
@@ -329,7 +398,133 @@ def order_list(request):
     for order in orders:
         # Add a flag indicating if the order can be cancelled
         order.can_be_cancelled = order.status in ['Pending', 'Shipped']
+        order.has_pending_return_request = order.return_requests.filter(status='Pending').exists()
     return render(request, 'adminapp/order_list.html', {'orders': orders})
+
+
+from django.shortcuts import get_object_or_404, render
+from core.models import Order, UserProfile, Address
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def order_detail(request, order_id):
+    # Fetch the order object by ID
+    order = get_object_or_404(Order, id=order_id)
+    
+    # Fetch the user's profile (you can also get profile details like phone_number, bio, etc.)
+    user_profile = get_object_or_404(UserProfile, user=order.user)
+    
+    # Get the default shipping address
+    shipping_address = Address.objects.filter(user=order.user, is_default=True).first()
+    
+    # Calculate the total amount of each order item (quantity * price)
+    order_items = []
+    for item in order.items.all():
+        item_total = item.quantity * item.product.price  # Calculate the total for this item
+        order_items.append({
+            'item': item,
+            'item_total': item_total
+        })
+    
+    # Calculate the grand total for the order
+    grand_total = sum(item['item_total'] for item in order_items)
+    
+    # Pass order details, order_items, user profile, and shipping address to the template
+    return render(request, 'adminapp/order_detail.html', {
+        'order': order,
+        'order_items': order_items,
+        'grand_total': grand_total,
+        'shipping_address': shipping_address,  # Pass the default shipping address
+        'user': order.user,  # User who placed the order
+    })
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from core.models import Order, ReturnRequest
+from walletapp.models import Wallet, WalletTransaction
+from decimal import Decimal
+
+
+
+def process_return_request(request, order_id):
+    # Fetch the order
+    order = get_object_or_404(Order, id=order_id)
+
+    # Ensure there's a pending return request for this specific order
+    return_request = ReturnRequest.objects.filter(order=order, status='Pending').first()
+
+    if not return_request:
+        # Add message if no return request is found
+        messages.warning(request, f"No pending return request for Order ID: {order.id}")
+        return redirect('adminapp:order_list')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'approve':
+            # Approve the return request
+            order.status = 'Returned'  # Change the order status to 'Returned'
+            order.save()
+
+            # Update the return request status to 'Approved'
+            return_request.status = 'Approved'
+            return_request.save()
+
+            # Handle wallet and refund
+            wallet, created = Wallet.objects.get_or_create(user=order.user)  # Use order.user, not request.user
+            if created:
+                messages.success(request, f"Wallet created for {order.user.username}.")
+            else:
+                messages.info(request, f"Wallet already exists for {order.user.username}.")
+
+            try:
+                # Refund the amount back to the wallet
+                wallet.balance += Decimal(order.total_amount)
+                wallet.save()
+                messages.success(request, f"Refund of ${order.total_amount} successful for {order.user.username}.")
+            except Exception as e:
+                # Error during wallet update
+                messages.error(request, f"Error processing refund: {e}")
+                return redirect('adminapp:order_list')  # Redirect in case of error
+
+            # Record the transaction in WalletTransaction
+            try:
+                WalletTransaction.objects.create(
+                    wallet=wallet,
+                    transaction_type='refund',
+                    amount=Decimal(order.total_amount)  # Record the refund transaction
+                )
+                messages.success(request, "Transaction recorded successfully.")
+            except Exception as e:
+                messages.error(request, f"Error recording transaction: {e}")
+
+            return redirect('adminapp:order_list')
+        
+        elif action == 'reject':
+            # Reject the return request
+            return_request.status = 'Rejected'
+            return_request.save()
+
+            # Change the order status to 'Rejected'
+            order.status = 'Rejected'
+            order.save()
+
+            messages.info(request, f"Return request for Order ID: {order.id} has been rejected.")
+
+            return redirect('adminapp:order_list')
+
+    # If GET request, render the return request approval page
+    return render(request, 'adminapp/approve_return.html', {'order': order, 'return_request': return_request})
+
+
+
+
+
+
+
+
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -371,7 +566,7 @@ def cancel_order(request, order_id):
     
     # Check if the order can be cancelled (only orders that are 'Pending' or 'Shipped' can be cancelled)
     if order.status in ['Pending', 'Shipped']:
-        for item in order.order_items.all():
+        for item in order.items.all():
             product = item.product
             product.stock += item.quantity  # Increment the stock by the quantity of the product
             product.save()
@@ -386,6 +581,8 @@ def cancel_order(request, order_id):
 
 
 # View for adding or editing a coupon
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def add_edit_coupon(request, coupon_id=None):
     if coupon_id:
         coupon = Coupon.objects.get(id=coupon_id)
@@ -406,18 +603,41 @@ def add_edit_coupon(request, coupon_id=None):
     return render(request, 'adminapp/add_edit_coupon.html', {'form': form, 'coupon': coupon})
 
 # View for listing all coupons
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def coupon_list(request):
-    coupons = Coupon.objects.all()
+    coupons = Coupon.objects.all().order_by('-created_at')
     return render(request, 'adminapp/coupon_list.html', {'coupons': coupons})
 
 # View to delete a coupon
-def delete_coupon(request, coupon_id):
-    coupon = Coupon.objects.get(id=coupon_id)
-    coupon.delete()
-    messages.success(request, 'Coupon deleted successfully.')
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def block_coupon(request, coupon_id):
+    coupon = get_object_or_404(Coupon, id=coupon_id)
+
+    # Set the coupon to blocked
+    coupon.is_blocked = True
+    coupon.save()
+
+    messages.success(request, f"Coupon '{coupon.code}' has been blocked.")
+    return redirect('adminapp:coupon_list')
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def unblock_coupon(request, coupon_id):
+    coupon = get_object_or_404(Coupon, id=coupon_id)
+
+    # Set the coupon to unblocked
+    coupon.is_blocked = False
+    coupon.save()
+
+    messages.success(request, f"Coupon '{coupon.code}' has been unblocked.")
     return redirect('adminapp:coupon_list')
 
 # View to apply a coupon to orders (example placeholder)
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def apply_coupon(request, coupon_id):
     coupon = Coupon.objects.get(id=coupon_id)
     # Apply coupon logic to orders, cart, etc.
@@ -425,7 +645,8 @@ def apply_coupon(request, coupon_id):
     return redirect('adminapp:coupon_list')
 
 
-
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def variant_list(request, product_id):
     # Fetch the product using the provided product_id
     product = get_object_or_404(Product, id=product_id)
@@ -435,7 +656,8 @@ def variant_list(request, product_id):
 
     return render(request, 'adminapp/variant_list.html', {'product': product, 'variants': variants})
 
-
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def add_variant(request, product_id):
     product = get_object_or_404(Product, id=product_id)
 
@@ -452,6 +674,9 @@ def add_variant(request, product_id):
 
     return render(request, 'adminapp/add_variant.html', {'form': form, 'product': product})
 
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def edit_variant(request, variant_id):
     # Fetch the variant by ID
     variant = get_object_or_404(Variants, id=variant_id)
@@ -467,25 +692,42 @@ def edit_variant(request, variant_id):
 
     return render(request, 'adminapp/edit_variant.html', {'form': form, 'variant': variant})
 
-def delete_variant(request, variant_id):
-    # Fetch the variant by ID
+# Block variant view
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def block_variant(request, variant_id):
     variant = get_object_or_404(Variants, id=variant_id)
-    product_id = variant.product.id  # Save the product ID to redirect after deletion
+    product_id = variant.product.id  # Save the product ID to redirect after blocking
 
-    if request.method == 'POST':
-        variant.delete()
-        messages.success(request, "Variant deleted successfully!")
-        return redirect('adminapp:variant_list', product_id=product_id)
+    # Set the variant to blocked
+    variant.is_blocked = True
+    variant.save()
 
-    return render(request, 'adminapp/confirm_delete_variant.html', {'variant': variant})
+    messages.success(request, f"Variant has been blocked!")
+    return redirect('adminapp:variant_list', product_id=product_id)
+
+# Unblock variant view
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def unblock_variant(request, variant_id):
+    variant = get_object_or_404(Variants, id=variant_id)
+    product_id = variant.product.id  # Save the product ID to redirect after unblocking
+
+    # Set the variant to unblocked
+    variant.is_blocked = False
+    variant.save()
+
+    messages.success(request, f"Variant has been unblocked!")
+    return redirect('adminapp:variant_list', product_id=product_id)
 
 
-import datetime
+
 from django.shortcuts import render
-from django.db.models import Sum
 from django.utils import timezone
-
-
+from django.db.models import Sum
+import datetime
+from datetime import timedelta
+from core.models import Order
 
 def sales_report(request):
     today = timezone.now()
@@ -494,27 +736,34 @@ def sales_report(request):
     sales_count = 0
     total_sales = 0
     total_discount = 0
+    orders = []
 
     # Handle different date filters
     if request.method == 'POST':
         report_type = request.POST.get('report_type')  # Daily, Weekly, Monthly, Custom
         if report_type == 'daily':
-            start_date = today - datetime.timedelta(days=1)
+            start_date = today - timedelta(days=1)
             end_date = today
         elif report_type == 'weekly':
-            start_date = today - datetime.timedelta(weeks=1)
+            start_date = today - timedelta(weeks=1)
             end_date = today
         elif report_type == 'monthly':
-            start_date = today - datetime.timedelta(weeks=4)
+            start_date = today - timedelta(weeks=4)
             end_date = today
         elif report_type == 'yearly':
-            start_date = today - datetime.timedelta(weeks=52)
+            start_date = today - timedelta(weeks=52)
             end_date = today
         elif report_type == 'custom':
-            start_date = request.POST.get('start_date')
-            end_date = request.POST.get('end_date')
-            start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
-            end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d") + datetime.timedelta(days=1)
+            start_date_str = request.POST.get('start_date')
+            end_date_str = request.POST.get('end_date')
+            
+            if start_date_str and end_date_str:
+                start_date = timezone.make_aware(datetime.strptime(start_date_str, "%Y-%m-%d"))
+                end_date = timezone.make_aware(datetime.strptime(end_date_str, "%Y-%m-%d")) + timedelta(days=1)  # Add 1 day to include the entire end date
+
+        # Adjust end_date to be the last moment of the day if not custom
+        if report_type != 'custom':
+            end_date = timezone.datetime.combine(end_date, timezone.datetime.max.time()).replace(tzinfo=timezone.utc)
 
         # Fetch orders within the selected date range
         orders = Order.objects.filter(placed_at__range=[start_date, end_date])
@@ -528,21 +777,25 @@ def sales_report(request):
         'sales_count': sales_count,
         'total_sales': total_sales,
         'total_discount': total_discount,
+        'orders': orders,  # Pass the orders to the template
     })
 
 
 
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 from io import BytesIO
+from django.utils import timezone
+from datetime import datetime
+from django.db.models import Sum
+from core.models import Order  # Adjust based on your actual app model import
+
 def sales_report_pdf(request):
     # Fetch the date range for the report
     report_type = request.GET.get('report_type', 'daily')
     start_date = None
-    end_date = timezone.now().date()
+    end_date = timezone.now().date()  # Default end_date is today's date
 
     # Determine the date range based on the report type
     if report_type == 'daily':
@@ -554,12 +807,13 @@ def sales_report_pdf(request):
     elif report_type == 'yearly':
         start_date = timezone.now() - timezone.timedelta(days=365)
     elif report_type == 'custom':
-        start_date = request.GET.get('start_date')
-        end_date = request.GET.get('end_date')
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
         
-        if start_date and end_date:
-            start_date = timezone.make_aware(datetime.strptime(start_date_str, "%Y-%m-%d"))
-            end_date = timezone.make_aware(datetime.strptime(end_date_str, "%Y-%m-%d"))
+        # Parse and convert the custom start and end date strings to timezone-aware datetimes
+        if start_date_str and end_date_str:
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
 
     # Adjust the end_date to the end of the day if not custom
     if report_type != 'custom':
@@ -598,6 +852,7 @@ def sales_report_pdf(request):
     # Write the generated PDF to the response
     response.write(buffer.getvalue())
     return response
+
 
 from openpyxl import Workbook
 from django.http import HttpResponse

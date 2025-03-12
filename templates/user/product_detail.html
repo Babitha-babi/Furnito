@@ -57,42 +57,38 @@
               <p>{{ product.description }}</p>
               <form action="{% url 'core:add_to_cart' product.id %}" method="POST">
                 {% csrf_token %}
-              <table class="table table-bordered">
-                <tr>
-                    <th>Colors</th>
-                    <td>
-                        <div>
-                            {% for variant in variants %}
-                                {% if forloop.first or variant.color != prev_color %}
-                                    <label class="color-radio">
-                                        <input type="radio" name="color" value="{{ variant.color.id }}" data-price="{{ variant.price }}" data-stock="{{ variant.stock }}" data-color="{{ variant.color.name }}">
-                                        <!-- <span style="background-color: {{ variant.color.code }}; display: inline-block; width: 30px; height: 30px; border-radius: 50%;"></span>--> {{ variant.color.name }} 
-                                    </label><br>
-                                {% endif %}
-                                {% with prev_color=variant.color %}
-                                {% endwith %}
-                            {% endfor %}
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Sizes</th>
-                    <td>
-                        <div>
-                            {% for variant in variants %}
-                                {% if forloop.first or variant.size != prev_size %}
-                                    <label class="size-radio">
-                                        <input type="radio" name="size" value="{{ variant.size.id }}" data-price="{{ variant.price }}" data-stock="{{ variant.stock }}" data-size="{{ variant.size.name }}">
-                                        {{ variant.size.name }}
-                                    </label><br>
-                                {% endif %}
-                                {% with prev_size=variant.size %}
-                                {% endwith %}
-                            {% endfor %}
-                        </div>
-                    </td>
-                </tr>
-            </table>
+                <table class="table table-bordered">
+                  <!-- Colors -->
+                  <tr>
+                      <th>Colors</th>
+                      <td>
+                          <div>
+                              {% for color in colors %}
+                                  <label class="color-radio">
+                                      <input type="radio" name="color" value="{{ color.id }}" data-price="{{ color.price }}" data-stock="{{ color.stock }}" data-color="{{ color.name }}">
+                                      <!-- <span style="background-color: {{ color.code }}; display: inline-block; width: 30px; height: 30px; border-radius: 50%;"></span>--> {{ color.name }} 
+                                  </label><br>
+                              {% endfor %}
+                          </div>
+                      </td>
+                  </tr>
+              
+                  <!-- Sizes -->
+                  <tr>
+                      <th>Sizes</th>
+                      <td>
+                          <div>
+                              {% for size in sizes %}
+                                  <label class="size-radio">
+                                      <input type="radio" name="size" value="{{ size.id }}" data-price="{{ size.price }}" data-stock="{{ size.stock }}" data-size="{{ size.name }}">
+                                      {{ size.name }}
+                                  </label><br>
+                              {% endfor %}
+                          </div>
+                      </td>
+                  </tr>
+              </table>
+              
 
               <!-- Add to Cart Form -->
                 <p>Available stock: <span id="stock-info">{{ total_stock }}</span></p>

@@ -1,5 +1,6 @@
 from django.urls import path,include
 from . import views
+from django.http import HttpResponse
 
 app_name = 'core'
 
@@ -28,6 +29,7 @@ urlpatterns = [
     path('order/<int:order_id>/detail/', views.order_detail, name='order_detail'),
     path('cancel_order/<int:order_id>/', views.cancel_order, name='cancel_order'),
     path('return_order/<int:order_id>/', views.return_order, name='return_order'),
+    
 
 
     path('address/add/', views.add_address, name='add_address'),

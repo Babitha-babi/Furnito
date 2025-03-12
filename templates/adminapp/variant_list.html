@@ -28,7 +28,12 @@
               <td>${{ variant.price }}</td>
               <td>
                 <a href="{% url 'adminapp:edit_variant' variant.id %}" class="btn btn-warning btn-sm">Edit</a>
-                <a href="{% url 'adminapp:delete_variant' variant.id %}" class="btn btn-danger btn-sm">Delete</a>
+                  
+                {% if variant.is_blocked %}
+                  <a href="{% url 'adminapp:unblock_variant' variant.id %}" class="btn btn-success btn-sm">Unblock</a>
+                {% else %}
+                  <a href="{% url 'adminapp:block_variant' variant.id %}" class="btn btn-danger btn-sm">Block</a>
+                {% endif %}
               </td>
             </tr>
           {% empty %}

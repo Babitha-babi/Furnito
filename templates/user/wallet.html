@@ -61,10 +61,10 @@
                         <div class="wallet-info">
                             <p><strong>Balance: </strong>${{ wallet.balance }}</p>
                         </div>
-
+            
                         <!-- Add Funds Button -->
                         <button class="btn btn-primary" id="addFundsBtn" data-toggle="modal" data-target="#addFundsModal">Add Funds</button>
-
+            
                         <!-- Add Funds Modal (Pop-up) -->
                         <div class="modal" id="addFundsModal" tabindex="-1" role="dialog" aria-labelledby="addFundsModalLabel" aria-hidden="true">
                             <div class="modal-dialog" role="document">
@@ -80,7 +80,7 @@
                                         <div class="modal-body">
                                             <div class="form-group">
                                                 <label for="amount">Amount to Add</label>
-                                                <input type="number" name="amount" id="amount" class="form-control" placeholder="Enter amount" required>
+                                                <input type="number" name="amount" id="amount" class="form-control" placeholder="Enter amount" required min="1" step="0.01">
                                             </div>
                                         </div>
                                         <div class="modal-footer">
@@ -91,7 +91,21 @@
                                 </div>
                             </div>
                         </div>
+            
+                        <!-- Feedback messages (if any) -->
+                        {% if messages %}
+                            <div class="alert alert-info">
+                                {% for message in messages %}
+                                    <p>{{ message }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+            
                         <br><br>
+                    </div>
+                </div>
+            </div>
+            
 
                         <table class="table">
                             <thead>

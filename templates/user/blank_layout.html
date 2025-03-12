@@ -87,8 +87,9 @@
                             </a>
                         
                             <!-- Wishlist Icon -->
-                            <a href="">
+                            <a href="{% url 'wishlist:wishlist' %}" class="text-decoration-none"> 
                                 <i class="ti-heart"></i>
+                                
                             </a>
 
                             
@@ -97,13 +98,13 @@
                             <div class="cart-container">
                                 <a href="{% url 'core:cart_detail' %}" id="cart-link">
                                     <i class="fas fa-cart-plus"></i> 
-                                    <span id="cart-quantity">
+                                    <!-- <span id="cart-quantity">
                                         {% if request.session.cart_data_obj %}
                                             {{ request.session.cart_data_obj|length }}
                                         {% else %}
                                             0 
                                         {% endif %}
-                                    </span>
+                                    </span> -->
                                 </a>
                             </div>
 
